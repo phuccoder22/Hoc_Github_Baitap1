@@ -1,0 +1,399 @@
+{
+  "schemaVersion": 1,
+  "mode": "practice",
+  "revision": 3,
+  "counters": {
+    "SO": 1,
+    "L": 1,
+    "EV": 3,
+    "CF": 1,
+    "R": 1
+  },
+  "customers": [
+    {
+      "id": "KH01",
+      "name": "Công ty An Phát"
+    },
+    {
+      "id": "KH02",
+      "name": "Cửa hàng Bình Minh"
+    }
+  ],
+  "products": [
+    {
+      "id": "SP01",
+      "name": "Gạch lát nền",
+      "initialStock": 6,
+      "unitPrice": 1000000
+    },
+    {
+      "id": "SP02",
+      "name": "Keo dán gạch",
+      "initialStock": 60,
+      "unitPrice": 50000
+    },
+    {
+      "id": "SP03",
+      "name": "Ke chít mạch",
+      "initialStock": 40,
+      "unitPrice": 25000
+    }
+  ],
+  "headers": [
+    {
+      "id": "practice:SO-0001",
+      "code": "SO-0001",
+      "sequence": 1,
+      "createdAt": "2026-10-28T08:00:00.000Z",
+      "customerId": "KH01",
+      "currency": "VND",
+      "warehouseId": "WH01"
+    }
+  ],
+  "lines": [
+    {
+      "id": "practice:L-0001",
+      "code": "L-0001",
+      "sequence": 1,
+      "createdAt": "2026-10-28T08:00:00.000Z",
+      "orderId": "practice:SO-0001",
+      "lineNo": 1,
+      "productId": "SP01",
+      "orderedQty": 2,
+      "unitPriceSnapshot": 1000000
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "practice:CF-0001",
+      "code": "CF-0001",
+      "sequence": 2,
+      "createdAt": "2026-10-28T08:00:00.000Z",
+      "orderId": "practice:SO-0001",
+      "headerSnapshot": {
+        "id": "practice:SO-0001",
+        "code": "SO-0001",
+        "sequence": 1,
+        "createdAt": "2026-10-28T08:00:00.000Z",
+        "customerId": "KH01",
+        "currency": "VND",
+        "warehouseId": "WH01"
+      },
+      "lineSnapshot": {
+        "id": "practice:L-0001",
+        "code": "L-0001",
+        "sequence": 1,
+        "createdAt": "2026-10-28T08:00:00.000Z",
+        "orderId": "practice:SO-0001",
+        "lineNo": 1,
+        "productId": "SP01",
+        "orderedQty": 2,
+        "unitPriceSnapshot": 1000000
+      }
+    }
+  ],
+  "reservations": [
+    {
+      "id": "practice:R-0001",
+      "code": "R-0001",
+      "sequence": 3,
+      "createdAt": "2026-10-28T08:00:00.000Z",
+      "orderLineId": "practice:L-0001",
+      "quantity": 2
+    }
+  ],
+  "pickings": [],
+  "packingSlips": [],
+  "invoices": [],
+  "payments": [],
+  "settlements": [],
+  "events": [
+    {
+      "id": "practice:EV-0001",
+      "code": "EV-0001",
+      "sequence": 1,
+      "createdAt": "2026-10-28T08:00:00.000Z",
+      "action": "createOrder",
+      "role": "Bán hàng",
+      "command": {
+        "type": "createOrder",
+        "customerId": "KH01",
+        "productId": "SP01",
+        "quantity": 2,
+        "requestId": "legacy-1"
+      },
+      "documentIds": [
+        "practice:SO-0001",
+        "practice:L-0001"
+      ],
+      "before": {
+        "inventory": [
+          {
+            "productId": "SP01",
+            "actual": 6,
+            "reserved": 0,
+            "available": 6,
+            "pickedOpen": 0
+          },
+          {
+            "productId": "SP02",
+            "actual": 60,
+            "reserved": 0,
+            "available": 60,
+            "pickedOpen": 0
+          },
+          {
+            "productId": "SP03",
+            "actual": 40,
+            "reserved": 0,
+            "available": 40,
+            "pickedOpen": 0
+          }
+        ],
+        "balances": [
+          {
+            "customerId": "KH01",
+            "O": 0,
+            "U": 0,
+            "N": 0
+          },
+          {
+            "customerId": "KH02",
+            "O": 0,
+            "U": 0,
+            "N": 0
+          }
+        ]
+      },
+      "after": {
+        "inventory": [
+          {
+            "productId": "SP01",
+            "actual": 6,
+            "reserved": 0,
+            "available": 6,
+            "pickedOpen": 0
+          },
+          {
+            "productId": "SP02",
+            "actual": 60,
+            "reserved": 0,
+            "available": 60,
+            "pickedOpen": 0
+          },
+          {
+            "productId": "SP03",
+            "actual": 40,
+            "reserved": 0,
+            "available": 40,
+            "pickedOpen": 0
+          }
+        ],
+        "balances": [
+          {
+            "customerId": "KH01",
+            "O": 0,
+            "U": 0,
+            "N": 0
+          },
+          {
+            "customerId": "KH02",
+            "O": 0,
+            "U": 0,
+            "N": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "practice:EV-0002",
+      "code": "EV-0002",
+      "sequence": 2,
+      "createdAt": "2026-10-28T08:00:00.000Z",
+      "action": "confirmOrder",
+      "role": "Bán hàng",
+      "command": {
+        "type": "confirmOrder",
+        "orderId": "practice:SO-0001",
+        "requestId": "legacy-2"
+      },
+      "documentIds": [
+        "practice:CF-0001"
+      ],
+      "before": {
+        "inventory": [
+          {
+            "productId": "SP01",
+            "actual": 6,
+            "reserved": 0,
+            "available": 6,
+            "pickedOpen": 0
+          },
+          {
+            "productId": "SP02",
+            "actual": 60,
+            "reserved": 0,
+            "available": 60,
+            "pickedOpen": 0
+          },
+          {
+            "productId": "SP03",
+            "actual": 40,
+            "reserved": 0,
+            "available": 40,
+            "pickedOpen": 0
+          }
+        ],
+        "balances": [
+          {
+            "customerId": "KH01",
+            "O": 0,
+            "U": 0,
+            "N": 0
+          },
+          {
+            "customerId": "KH02",
+            "O": 0,
+            "U": 0,
+            "N": 0
+          }
+        ]
+      },
+      "after": {
+        "inventory": [
+          {
+            "productId": "SP01",
+            "actual": 6,
+            "reserved": 0,
+            "available": 6,
+            "pickedOpen": 0
+          },
+          {
+            "productId": "SP02",
+            "actual": 60,
+            "reserved": 0,
+            "available": 60,
+            "pickedOpen": 0
+          },
+          {
+            "productId": "SP03",
+            "actual": 40,
+            "reserved": 0,
+            "available": 40,
+            "pickedOpen": 0
+          }
+        ],
+        "balances": [
+          {
+            "customerId": "KH01",
+            "O": 0,
+            "U": 0,
+            "N": 0
+          },
+          {
+            "customerId": "KH02",
+            "O": 0,
+            "U": 0,
+            "N": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "practice:EV-0003",
+      "code": "EV-0003",
+      "sequence": 3,
+      "createdAt": "2026-10-28T08:00:00.000Z",
+      "action": "reserve",
+      "role": "Kho",
+      "command": {
+        "type": "reserve",
+        "orderLineId": "practice:L-0001",
+        "quantity": 2,
+        "requestId": "legacy-3"
+      },
+      "documentIds": [
+        "practice:R-0001"
+      ],
+      "before": {
+        "inventory": [
+          {
+            "productId": "SP01",
+            "actual": 6,
+            "reserved": 0,
+            "available": 6,
+            "pickedOpen": 0
+          },
+          {
+            "productId": "SP02",
+            "actual": 60,
+            "reserved": 0,
+            "available": 60,
+            "pickedOpen": 0
+          },
+          {
+            "productId": "SP03",
+            "actual": 40,
+            "reserved": 0,
+            "available": 40,
+            "pickedOpen": 0
+          }
+        ],
+        "balances": [
+          {
+            "customerId": "KH01",
+            "O": 0,
+            "U": 0,
+            "N": 0
+          },
+          {
+            "customerId": "KH02",
+            "O": 0,
+            "U": 0,
+            "N": 0
+          }
+        ]
+      },
+      "after": {
+        "inventory": [
+          {
+            "productId": "SP01",
+            "actual": 6,
+            "reserved": 2,
+            "available": 4,
+            "pickedOpen": 0
+          },
+          {
+            "productId": "SP02",
+            "actual": 60,
+            "reserved": 0,
+            "available": 60,
+            "pickedOpen": 0
+          },
+          {
+            "productId": "SP03",
+            "actual": 40,
+            "reserved": 0,
+            "available": 40,
+            "pickedOpen": 0
+          }
+        ],
+        "balances": [
+          {
+            "customerId": "KH01",
+            "O": 0,
+            "U": 0,
+            "N": 0
+          },
+          {
+            "customerId": "KH02",
+            "O": 0,
+            "U": 0,
+            "N": 0
+          }
+        ]
+      }
+    }
+  ],
+  "lessonProgress": {}
+}

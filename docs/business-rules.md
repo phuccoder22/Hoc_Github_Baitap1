@@ -26,7 +26,7 @@ Một kho WH01, tiền VND, không số dư đầu của khách. Số lượng v
 
 ## 3. Thực thể và quan hệ
 
-Các bản ghi nghiệp vụ có ID duy nhất trong dataset, mã dễ đọc, createdAt, sequence; bộ đếm không tái sử dụng. Mốc 1 triển khai mô hình này; chưa hỗ trợ migration, nhập/xuất JSON hoặc nhiều tab.
+Các bản ghi nghiệp vụ có ID duy nhất trong dataset, mã dễ đọc, createdAt, sequence; bộ đếm không tái sử dụng. V1.1 triển khai mô hình này; chưa hỗ trợ migration, nhập/xuất JSON hoặc nhiều tab.
 
 | Thực thể | Trường chính | Quan hệ / giới hạn |
 | --- | --- | --- |
@@ -43,7 +43,7 @@ Các bản ghi nghiệp vụ có ID duy nhất trong dataset, mã dễ đọc, c
 | CustomerPayment | id, customerId, amount | Khoản thanh toán đã ghi nhận, không có journal draft trong V1 |
 | Settlement | id, paymentId, invoiceId, amount | Liên kết payment–invoice cùng khách; nhiều-nhiều |
 | Event | id, sequence, action, role, documentIds, before, after | Một sự kiện cho mỗi thao tác thành công; không là nguồn tính tồn/số dư |
-| LessonProgress | lessonVersion, stepDocumentIds, answers, explanationChecks | Dùng tìm đối tượng/khôi phục câu hỏi; không thay thế kiểm tra nghiệp vụ |
+| LessonProgress | guided: {version, predictions, reviews, final}; practiceExercise: {version, kind} | Guided: dự đoán, giải thích, kiểm tra cuối; practice: bài đơn 2. Không dùng cờ completed làm bằng chứng nghiệp vụ |
 
 Trong bản thiết kế trước, Cash Receipt/Cash Application là tên khái niệm. Từ bản này dùng CustomerPayment/Settlement nhất quán, không tạo thêm một cặp nghiệp vụ bên cạnh chúng.
 
@@ -138,7 +138,7 @@ Tám thao tác là thiết kế simulator. Confirm/Picking bắt buộc trong la
 
 `đơn hoàn tất của lab = đã giao = Q AND đã invoice = Q AND mọi invoice của đơn có số dư mở = 0`. Không dùng N=0 hoặc tổng tiền đã nhận để thay điều kiện này. Tiền dư của khách không quyết định hoàn tất một đơn. D365 “Invoiced” là trạng thái liên quan giao/invoice theo hệ thống, không chứng minh đã thu đủ; không dùng nhãn “Hoàn tất” của lab làm tên status D365.
 
-`bài học hoàn thành = trạng thái đích case đúng AND kiểm tra giải thích tác động đạt`. Nó khác `đơn hoàn tất`. Cuối case: Confirm có; giao 6/10; invoice 6/10; backorder 4; invoice còn mở 2 triệu; payment 4 triệu được settlement hết (dư payment = 0), invoice 6 triệu còn mở 2 triệu; đơn còn 4 sản phẩm chờ giao và chưa hoàn tất. Guided và công nhận hoàn thành bài là mốc sau.
+`bài học hoàn thành = trạng thái đích case đúng AND kiểm tra giải thích tác động đạt`. Nó khác `đơn hoàn tất`. Cuối case: Confirm có; giao 6/10; invoice 6/10; backorder 4; invoice còn mở 2 triệu; payment 4 triệu được settlement hết (dư payment = 0), invoice 6 triệu còn mở 2 triệu; đơn còn 4 sản phẩm chờ giao và chưa hoàn tất. Guided V1.1 chỉ công nhận bài khi cả dữ liệu thật và câu trả lời có cấu trúc đúng.
 
 ## 8. Bất biến cần kiểm tra
 
@@ -155,19 +155,39 @@ Hoạt động học (dự đoán/trả lời/xem giải thích), lưu/tải/th�
 
 Dùng HTML/CSS/JavaScript thuần, script cổ điển `defer`; không ES modules, fetch dữ liệu nội bộ hoặc CDN. Bài học/seed đóng gói trong script; nguồn Learn là đọc thêm, không phải API runtime. Mở `file://` phải kiểm chứng trên Edge/Chrome Windows.
 
-### Mốc 1: localStorage cơ bản
+### V1.1: localStorage và tiến độ học
 
-Hai khóa riêng: `o2c-lab.guided.v1`, `o2c-lab.practice.v1`; mỗi khóa có dataset đầy đủ, schemaVersion và revision. Chỉ practice có giao diện hoạt động. Seed, execute và tính số dư là logic chung cho cả hai mode; không tạo bản domain riêng cho guided.
+Hai khóa riêng: `o2c-lab.guided.v1`, `o2c-lab.practice.v1`; mỗi khóa có dataset đầy đủ, schemaVersion và revision. Cả guided và practice có giao diện, cùng Seed và Domain.execute/các selector; không tạo domain riêng cho bài học. lessonProgress lưu câu trả lời và bài đang thực hành; không tăng revision hoặc Event nghiệp vụ. URL hash giữ chế độ khi tải lại.
 
-Chỉ tự seed khi khóa không tồn tại. Nếu JSON hỏng, schema không hỗ trợ, chứng từ/quan hệ không hợp lệ hoặc đọc bị chặn: giữ nguyên dữ liệu cũ, dùng phiên tạm có cảnh báo, không âm thầm ghi đè. Người dùng phải xác nhận đặt lại để cho phép thay dữ liệu cũ. Mốc 1 không migration hoặc xuất file khôi phục.
+Chỉ tự seed khi khóa không tồn tại. Nếu JSON hỏng, schema không hỗ trợ, chứng từ/quan hệ không hợp lệ hoặc đọc bị chặn: giữ nguyên dữ liệu cũ, dùng phiên tạm có cảnh báo, không âm thầm ghi đè. Người dùng phải xác nhận đặt lại để cho phép thay dữ liệu cũ. V1.1 không migration hoặc xuất file khôi phục.
 
 Thao tác: tạo bản sao → kiểm tra → thêm chứng từ/Event, tăng revision → kiểm tra bất biến → thử ghi một JSON đầy đủ → cập nhật bộ nhớ/giao diện. Nếu setItem lỗi quota/quyền: vẫn dùng trạng thái hợp lệ trong phiên, báo rõ “Chưa lưu trên máy; đóng trang có thể mất dữ liệu”, cho thử lưu lại. Thử lưu lại chỉ lưu trạng thái mới nhất, không gọi nghiệp vụ lần nữa. Không có xuất JSON trong mốc này và thông báo không được đề nghị chức năng chưa có.
 
-Đặt lại practice có xác nhận; nếu hủy không đổi gì, nếu đồng ý tạo seed mới và thử lưu, báo kết quả thực tế. Không chạm khóa guided. Không hỗ trợ nhiều tab: hướng dẫn chỉ mở một tab, không triển khai storage event, merge hoặc khóa xung đột. Di chuyển thư mục/đổi trình duyệt có thể không thấy cùng dữ liệu.
+Đặt lại chế độ hiện tại có xác nhận; hủy không đổi gì, đồng ý tạo seed mới và thử lưu, báo kết quả thực tế. Không chạm khóa chế độ khác. Bắt đầu bài đơn 2 cũng dùng xác nhận đặt lại riêng practice; chỉ chuẩn bị nội dung/form, không tạo chứng từ. Không hỗ trợ nhiều tab: hướng dẫn chỉ mở một tab, không triển khai storage event, merge hoặc khóa xung đột. Di chuyển thư mục/đổi trình duyệt có thể không thấy cùng dữ liệu.
 
 ### Để mốc sau
 
-Xuất/nhập JSON có kiểm tra, chính sách migration khi thực sự có schema mới và xử lý xung đột nhiều tab cần thiết kế/kiểm chứng riêng. Không coi những phần này là điều kiện hoàn thành mốc 1.
+Xuất/nhập JSON có kiểm tra, chính sách migration khi thực sự có schema mới và xử lý xung đột nhiều tab cần thiết kế/kiểm chứng riêng. Không coi những phần này là điều kiện hoàn thành V1.1.
+
+### Chẩn đoán và phạm vi số liệu
+
+`orderDiagnosis` dùng lineMetrics và số dư invoice thuộc đúng đơn: còn chờ giao = Q − giao; đủ điều kiện invoice ngay = giao − invoice; chưa đủ điều kiện vì chưa giao = Q − giao. Hai lượng cuối không được cộng/trừ lẫn lộn hoặc invoice phần chưa giao.
+
+`customerTotals` cung cấp tổng invoice, tổng payment và tổng settlement của đúng khách để giải thích O/U/N. Phần thiếu tiền ròng = max(0,N) chỉ là chỉ tiêu **cấp khách**. Hiển thị U của khách bên cạnh dư invoice của đơn kèm nhắc “chưa dành riêng”; không ghi allocation, không trừ U chỉ do xem đơn và không tính N thành dư riêng của từng đơn. Nút điều hướng chỉ chọn đúng form/khách/invoice, không ghi tiền hoặc settlement.
+
+### Nhật ký và xem trước
+
+`Insights` dựng trạng thái đọc theo sequence từ chứng từ bất biến, không execute trong lúc xem lại. Mỗi bảng có cả chỉ tiêu liên quan không đổi: Confirm thay trạng thái, Picking thay lấy chưa giao, settlement hiện N trước = sau và số dư riêng invoice/payment. Không chỉ lọc chênh lệch tồn/O/U vì có thể làm Tạo đơn/Confirm không có bảng. Sự kiện cũ mốc 1 được đọc theo cùng chứng từ, không cần sửa lịch sử để bổ sung bảng.
+
+Xem trước dùng Domain.execute với requestId trên bản sao. Xác nhận không dùng thẳng candidate đã tính; kiểm tra mode/revision và chạy lại cùng lệnh trên trạng thái hiện tại. Trong guided còn kiểm tra lệnh đúng bước đang được phép. Chỉ lần ghi nhận mới thêm một Event.
+
+### Tiến độ guided và bài practice
+
+Guided lưu `lessonProgress.guided` phiên bản 1, gồm predictions/reviews theo chỉ số 0–7 và final (O,U,N VND; backorder; reason; zeroNet). Trạng thái bước tính từ chứng từ thật cộng đáp án, không lưu cờ hoàn thành có quyền quyết định. Mỗi lệnh phải khớp tiền tố case chuẩn; chứng từ sai/mất hoặc ngoài case không được công nhận. Nếu nghiệp vụ bước đã xong mà câu giải thích sai/chưa trả lời, chỉ hỏi lại; không cho execute bước đó lần nữa. Đáp án sai có thể xem giải thích và thử lại.
+
+Cuối bài phải có đúng 8 Event, giao/invoice 6/10, O/U/N=2/0/2 triệu, backorder 4, payment dùng hết; cùng đáp án số và lý do đúng. “Bài học hoàn thành” khác “đơn hoàn tất”. Domain.validate kiểm tra toàn bộ nghiệp vụ bằng lịch sử lệnh; phần học được đọc/kiểm tra riêng, không đưa trả lời câu hỏi vào Event.
+
+Practice lưu `lessonProgress.practiceExercise` cho bài đơn 2; bắt đầu bằng seed mới có xác nhận. Đơn mục tiêu đầu tiên đúng KH01/SP01/2/giá 1 triệu được theo dõi bằng chứng từ. N=0 khi payment chưa settlement chưa hoàn tất. Không tự xử lý bất kỳ bước nào hoặc xóa guided.
 
 ## 10. Nguồn Microsoft Learn và phạm vi đối chiếu
 

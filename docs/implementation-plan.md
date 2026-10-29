@@ -1,85 +1,62 @@
-# O2C Learning Lab — Kế hoạch triển khai
+# O2C Learning Lab — Kế hoạch và nghiệm thu V1.1
 
-## 1. Điều chỉnh phạm vi theo yêu cầu mới
+## 1. Hiện trạng và mục tiêu
 
-Mốc 1 cũ chỉ là khung giao diện; nay **mốc 1 là bản tự thực hành đủ tám thao tác**. Logic nhiều đơn, giữ/lấy/giao đúng đơn, invoice/payment/settlement, tính số dư, nhật ký và localStorage cơ bản đều có ở mốc 1. Mốc 6 chỉ hoàn thiện trải nghiệm và giải thích, không trì hoãn logic nhiều đơn.
+Mốc 1 đã có tám nghiệp vụ, nhiều đơn một dòng, phân bổ tự động, lưu và reset practice. V1.1 giúp người mới trả lời: **đơn thiếu hàng, thiếu hóa đơn, thiếu tiền hay thiếu cấn trừ?** Không thay các công thức và điều kiện đã chốt trong [business-rules.md](business-rules.md).
 
-Không đổi công thức nghiệp vụ trong [business-rules.md](business-rules.md). Sửa cách kết luận case: **payment 4 triệu được settlement hết, invoice 6 triệu còn mở 2 triệu, đơn còn 4 sản phẩm chờ giao**. “Settlement một phần” nếu nói về invoice phải nêu rõ; không ngụ ý payment vẫn chưa dùng hết.
+Khi kiểm tra trước sửa, Tạo đơn/Confirm không có bảng trước/sau vì giao diện chỉ lọc chỉ tiêu tồn/tiền có chênh lệch. Không phải mất dữ liệu nghiệp vụ. V1.1 đọc lại chứng từ theo sequence để dựng cả trạng thái đơn và các giá trị không đổi, không execute khi xem lịch sử.
 
-[learning-scenarios.md](learning-scenarios.md) là ngân hàng 18 tình huống, không phải 18 bài phải xây ở mốc 1. Mốc 1 dùng case chính như hướng dẫn thao tác thủ công trong practice, chưa có bộ điều phối/chấm bài guided. Seed hỗ trợ hai dataset độc lập `practice`/`guided`, cả hai dùng chung domain.
+## 2. Thứ tự triển khai V1.1
 
-**Chưa làm trong mốc 1:** nhập/xuất JSON, migration, xử lý nhiều tab; toàn bộ chế độ hướng dẫn; thuế, giá vốn, doanh thu kế toán, GL, integrations, X++, credit management, aging, collections. Review-o2c.md là bản ghép tài liệu trước lần điều chỉnh này, không phải nguồn quy tắc hiện hành.
+| Phần | Thay đổi | Tiêu chí nghiệm thu |
+| --- | --- | --- |
+| 1. Nhật ký | Chứng từ, lượng/tiền, giải thích, bảng trước/sau cho mọi sự kiện | Tạo đơn/Confirm không trống; settlement hiện N không đổi và không nhận thêm tiền; mở/đóng không đổi state/Event |
+| 2. Chẩn đoán đơn | Bốn chỉ tiêu riêng: còn chờ giao, giao chưa invoice, chưa giao chưa đủ điều kiện invoice, dư invoice của đơn; nút đi đến form | Hai đơn cùng khách có dư invoice riêng; U/thiếu tiền ròng là cấp khách, không tự dành tiền hoặc settlement |
+| 3. Ba số dư | Tổng thực và phép tính O/U/N; giải thích dấu N; tiêu đề rõ | N=0 vẫn có thể có invoice mở, N âm không lỗi; không dùng N làm dư riêng của đơn |
+| 4. Preview | Bảng mở sẵn, giải thích và cùng Domain.execute trên bản sao | Xem trước/hủy không có Event; xác nhận kiểm tra mode/revision và execute lại trên state mới nhất |
+| 5. Guided | Case thiếu hàng tám bước, dự đoán trước/giải thích sau/kiểm tra cuối có cấu trúc | Đúng cả chứng từ và đáp án mới hoàn thành bài; sai được thử lại; reload giữ bước; đúng 8 Event; đơn vẫn mở |
+| 6. Practice đơn 2 | Bắt đầu từ seed mới có xác nhận, người học tự làm đủ tám thao tác | Nhận 2 triệu có N=0 vẫn chưa xong nếu chưa settlement; sau giao/invoice đủ và hết dư invoice mới hoàn tất; reset không xóa guided |
 
-## 2. Cấu trúc mốc 1
+Chưa thêm nhập kho, thuế, giá vốn/doanh thu kế toán, GL, credit management, aging, collections, X++, AI/API, integrations, nhập/xuất JSON, migration, nhiều tab hoặc 18 bài học. Ngân hàng 18 tình huống vẫn là nguồn kiểm tra, không là số bài được triển khai.
+
+## 3. Cấu trúc mã
 
 ```text
-index.html                 Mở trực tiếp, dùng script cổ điển defer
-styles.css                 Trình bày tiếng Việt, không font/CDN bên ngoài
+index.html                  File mở trực tiếp; script cổ điển defer
+styles.css                  CSS/font hệ thống, không CDN
 js/
-  seed.js                  Danh mục và dataset độc lập theo mode
-  domain.js                Execute, tự phân bổ, tính tồn/số dư từ chứng từ
-  storage.js               Đọc/ghi, kiểm tra dữ liệu, lỗi lưu, reset riêng mode
-  app.js                   Biểu mẫu, xem trước, ghi nhận một lần, truy vết
+  seed.js                   Hai mode, cùng danh mục và cấu trúc
+  domain.js                 Tám giao dịch, tồn/số dư, tổng khách, chẩn đoán đơn
+  insights.js               Đọc lịch sử và mô tả tác động; không execute khi xem lại
+  lessons.js                Case, câu hỏi, tiến độ dẫn từ chứng từ, bài practice 2
+  storage.js                Hai khóa độc lập, kiểm tra/ghi JSON đầy đủ, lỗi lưu/reset
+  app.js                    Giao diện, hash mode, cache phiên, preview và xác nhận
 tests/
-  domain.test.cjs           Kiểm tra nghiệp vụ và lưu bằng Node tích hợp sẵn
-  browser-smoke.cjs         Kiểm tra trình duyệt bằng Playwright (chỉ phát triển)
-docs/                      Thiết kế; không cần mở để chạy app
-README.md                  Hướng dẫn Windows và giới hạn thực tế
+  domain.test.cjs            Hồi quy nghiệp vụ/lưu mốc 1
+  v11.test.cjs               Chẩn đoán, lịch sử, tiến độ, cô lập, hoàn tất đơn
+  browser-smoke.cjs          Hồi quy trình duyệt
+  v11-browser.cjs            Các luồng V1.1 qua điều khiển giao diện
 ```
 
-Không fetch file cục bộ, ES modules, bundler, server hoặc API runtime. Domain không đọc DOM/localStorage. Mỗi lệnh trả trạng thái mới hoặc lỗi; lỗi không sửa đầu vào. Seed/dataset mode khác nhau vẫn dùng cùng execute và công thức. Reservation/Picking được tự phân bổ theo thứ tự tạo, không bắt chọn ID kỹ thuật. Chỉ có PackingSlip ghi nhận giao hàng, không tạo thêm Shipment.
+Không server, fetch dữ liệu cục bộ, ES modules, bundler, tài nguyên ngoài hoặc runtime cần cài cho người dùng. Playwright/Node chỉ phục vụ phát triển/kiểm tra. Hai mode gọi cùng domain, không có hàm “giữ/giao/cấn trừ” riêng cho guided.
 
-Xem trước chạy trên bản sao, chưa ghi nghiệp vụ. Chỉ Ghi nhận mới cập nhật trạng thái và thử lưu. Mã requestId dùng một lần và kiểm tra trùng ở domain; giao diện tiêu thụ xác nhận trước khi render/lưu để bấm đúp không sinh hai chứng từ.
+## 4. Dữ liệu và tương thích
 
-## 3. Các mốc và tiêu chí nghiệm thu
+Giữ schemaVersion 1, hai khóa `o2c-lab.practice.v1` và `o2c-lab.guided.v1`. Dữ liệu mốc 1 có lessonProgress rỗng vẫn đọc được; không viết lại chứng từ/snapshot cũ để thêm bảng lịch sử. Tiến độ học dùng phần lessonProgress đã dành sẵn; không cộng Event/revision nghiệp vụ khi trả lời hoặc lưu. Domain.validate kiểm tra phần nghiệp vụ độc lập; Lessons kiểm tra bước/đáp án/case.
 
-### Mốc 1 — Tự thực hành xuyên suốt
+Guided chỉ có case chuẩn; dữ liệu không khớp hoặc phiên bản tiến độ không hỗ trợ thì báo rõ, không công nhận hoàn thành hoặc âm thầm reset. Reset cần xác nhận và chỉ chạm mode hiện tại. Bài practice đơn 2 đặt lại riêng practice có xác nhận, không tự tạo đơn. Cache phiên giữ dữ liệu khi chuyển mode nếu lưu thất bại; reload chỉ bảo toàn phần đã lưu thành công. Hash #guided/#practice giữ chế độ khi tải lại.
 
-Phạm vi: một kho WH01, hai khách, ba sản phẩm theo seed; nhiều đơn, mỗi đơn một Header/Line; tạo → Confirm → Reservation → Picking → PackingSlip → Invoice → CustomerPayment → Settlement. Xử lý từng phần; tồn và O/U/N tính từ chứng từ; trạng thái giao/invoice/settlement riêng; nhãn **Còn chờ giao** có giải thích Backorder. Có dòng chứng từ, nhật ký và lỗi rõ sai ở đâu/vì sao/làm gì tiếp.
+## 5. Kiểm tra
 
-Có câu hỏi gợi dự đoán trong xem trước một số thao tác; chưa chấm điểm hoặc hoàn thành bài. Sự kiện chỉ là nghiệp vụ; học, xem trước, lưu, retry và reset không thêm Event. Case chính có đúng 8 Event; tạo Header/Line là một Event.
+- `node tests/domain.test.cjs`: mọi quy tắc cũ, gồm các TH trọng tâm, không biến đổi state khi lỗi, không mượn nguồn đơn/khách, idempotency, lỗi lưu và hai mode.
+- `node tests/v11.test.cjs`: bảng lịch sử có dữ liệu và không execute; xem trước không ghi; chẩn đoán hai đơn cùng khách; công thức O/U/N và dấu N; bài guided sai/thử lại/reload/chống completed giả; bài practice 2 và tương thích dữ liệu mốc 1.
+- `node tests/browser-smoke.cjs`: mặc định thử `file://`, có biến `CHROMIUM_PATH` để chọn Chromium. `O2C_TEST_TRANSPORT=route` là kiểm tra qua origin ảo cấp file nội bộ, mạng tắt, không phải kiểm chứng file://.
+- `node tests/v11-browser.cjs`: bảng nhật ký nhìn thấy được, số dư từng đơn so với U cấp khách, điều hướng không tự ghi, dự đoán/giải thích/final sai và thử lại, reload ở các thời điểm, cô lập/reset, bài đơn 2, lỗi lưu tiến độ.
 
-LocalStorage: ghi một dataset đầy đủ mỗi giao dịch; báo thành công/thất bại đúng thực tế, giữ phiên khi lỗi và cho thử lưu lại. Đọc dữ liệu lỗi không âm thầm ghi đè; reset phải xác nhận và chỉ tác động practice. Không hứa xuất JSON vì chưa làm. Chỉ một tab được hỗ trợ.
+Kết quả thật (đạt/thất bại/chưa chạy hoặc bị môi trường chặn) ghi ở README sau khi thực thi. Không suy thành công từ số ca dự kiến hoặc chỉ mở trang.
 
-**Kiểm tra bắt buộc:** case chính và TH02, TH04, TH05, TH06, TH07, TH08, TH09, TH12, TH18. Chứng minh thêm:
+## 6. Giới hạn nghiệm thu
 
-- Giữ 6/lấy 4/giao 3 từ tồn 6 → thực tế 3, giữ còn lại 3, khả dụng 0, lấy chưa giao 1.
-- Sau payment: O/U/N=6/4/2 triệu; sau settlement: 2/0/2 triệu; N không đổi do settlement.
-- Đơn nhỏ đủ hàng, invoice và settlement hết có thể hoàn tất; N=0 chưa đủ để đóng invoice.
-- Không dùng nguồn giữ/lấy sai đơn hoặc payment sai khách. Payment có thể trả nhiều đơn **cùng khách**; không gắn payment cố định vào một đơn.
-- Sai thao tác giữ nguyên toàn bộ trạng thái. Một xác nhận bấm đúp chỉ ghi một lần.
-- Thử mở index.html ngoại tuyến và localStorage ngay trong mốc 1. Nếu môi trường chặn `file://`, báo đúng bằng chứng/giới hạn, không nhận nghiệm thu Windows hoặc file:// thay cho kết quả khác.
+Cần thử mở file trực tiếp ngoại tuyến ngay trong công việc này. Nếu Chromium của môi trường chặn file://, ghi lỗi cụ thể; kiểm tra qua origin ảo chỉ chứng minh giao diện/logic/storage trên origin đó. Không dùng Linux/headless hoặc ảnh chụp làm bằng chứng Windows.
 
-README chỉ rõ giải nén rồi mở index.html bằng Edge/Chrome Windows, không cài công cụ phát triển để dùng app. Nghiệm thu Windows đầy đủ vẫn ở mốc cuối; lỗi môi trường kiểm thử phải phân biệt với lỗi app. Kết quả đã chạy được ghi ở README, không suy từ tài liệu hoặc số ca dự kiến.
-
-### Mốc 2 — Hoàn thiện kiểm tra dữ liệu và truy vết
-
-Không xây lại logic đã có ở mốc 1. Đào sâu kiểm tra dữ liệu lưu và trình bày quan hệ/chứng từ trên tập dữ liệu lớn hơn nếu cần. Đạt khi không phá ca hồi quy mốc 1, lỗi dữ liệu giải thích rõ, không mở rộng sang nhiều dòng/kho ngoài phê duyệt.
-
-### Mốc 3 — Nội dung dự đoán và đối chiếu tác động
-
-Mở rộng câu hỏi dự đoán trước thao tác, đối chiếu trước/sau và lý do; phân biệt O2C chung, D365, giới hạn lab. Đạt khi giải thích đúng các biến thể và ba số dư; không biến credit/GL/integrations trong nguồn đọc thêm thành tính năng. Logic tiền đã có ở mốc 1.
-
-### Mốc 4 — Sao lưu và phục hồi nâng cao
-
-Thiết kế/triển khai nhập/xuất JSON có kiểm tra; cân nhắc migration khi thực sự có schema mới và chính sách nhiều tab riêng. Đây là mốc sau, không làm ở task hiện tại. Đạt khi dữ liệu sai không ghi đè, khôi phục đúng quan hệ và mode; chỉ công bố hỗ trợ phần đã được kiểm chứng.
-
-### Mốc 5 — Một bài hướng dẫn xuyên suốt
-
-Xây bộ điều phối tám bước và kiểm tra hiểu ở learning-scenarios, dùng chung domain với practice. Đạt khi trạng thái thực và giải thích cùng đúng mới hoàn thành; dự đoán/trả lời/lưu không tăng 8 Event nghiệp vụ của case. Payment dùng hết nhưng invoice vẫn mở 2 triệu; đơn chờ giao 4 và chưa hoàn tất dù bài có thể hoàn thành.
-
-### Mốc 6 — Trải nghiệm và khả năng giải thích
-
-Hoàn thiện chọn/lọc nhiều đơn, đọc dòng chứng từ và hướng dẫn lỗi. Logic nhiều đơn và giữ đúng đơn đã có từ mốc 1. Đạt khi người mới xử lý/giải thích được các ca chọn trong ngân hàng mà không đọc mã; không yêu cầu xây đủ 18 màn hình bài học nếu chưa chốt phạm vi đó.
-
-### Mốc 7 — Nghiệm thu Windows và đóng gói cuối
-
-Kiểm Edge và Chrome trên Windows, mở trực tiếp file từ thư mục giải nén có dấu/khoảng trắng, ngoại tuyến, lưu/tải lại, reset và chức năng của các mốc đã thực sự hoàn thành. Ghi phiên bản Windows/trình duyệt, số ca đạt/thất bại/chưa chạy. Không lấy kết quả Linux/nguồn ảo làm bằng chứng Windows/file://. Không cần server/key/runtime cho người dùng cuối.
-
-## 4. Cách kiểm tra mốc 1
-
-`node tests/domain.test.cjs` chạy bộ kiểm tra logic bằng Node test/assert tích hợp sẵn. Đây là công cụ phát triển, không cần để mở app. Có cả kiểm số liệu, quan hệ, đầu vào lỗi, không đột biến trạng thái, idempotency, hai dataset và lỗi lưu.
-
-`node tests/browser-smoke.cjs` mặc định thử mở `file://` bằng Chromium qua Playwright. Nếu chính sách trình duyệt chặn file://, có thể chạy riêng `O2C_TEST_TRANSPORT=route node tests/browser-smoke.cjs` trên Linux để kiểm giao diện/storage qua origin ảo phục vụ từ file địa phương; đây **không phải** xác nhận file://. Bộ kiểm thử chạy offline, không server hoặc kết nối dịch vụ ngoài. Playwright/Chromium chỉ là công cụ phát triển, không dependency của app. Chọn đường dẫn Chromium bằng biến `CHROMIUM_PATH` khi cần.
-
-Không chạy nhiều suite ngoài phạm vi khi các kiểm tra liên quan đã đạt. Báo kết quả thực tế và giới hạn ở README và phản hồi task.
+Nghiệm thu Edge và Chrome Windows trên thư mục giải nén có dấu/khoảng trắng vẫn cần chạy thật trên Windows. Kiểm tra tải lại/localStorage, đổi chế độ, reset, cả guided và practice; không cần server hoặc key. Không đổi chính sách môi trường để né hạn chế file://.

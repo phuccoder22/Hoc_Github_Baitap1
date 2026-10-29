@@ -10,7 +10,7 @@
         getStorage().setItem(key(state.mode), JSON.stringify(state));
         return { saved: true, message: 'Đã lưu trên trình duyệt này. Chỉ dùng một tab; đổi đường dẫn hoặc trình duyệt có thể không thấy cùng dữ liệu.' };
       } catch {
-        return { saved: false, message: 'Chưa lưu trên máy do trình duyệt chặn lưu hoặc hết dung lượng. Vẫn dùng được trong phiên; đóng trang có thể mất dữ liệu. Có thể thử lưu lại. Mốc 1 chưa có xuất file sao lưu.' };
+        return { saved: false, message: 'Chưa lưu trên máy do trình duyệt chặn lưu hoặc hết dung lượng. Vẫn dùng được trong phiên; đóng trang có thể mất dữ liệu. Có thể thử lưu lại. V1.1 chưa có xuất file sao lưu.' };
       }
     }
     function open(mode) {

@@ -789,3 +789,36 @@ dialog::backdrop {
   }
 
 }
+
+/* V1.1: learning and explanations, without overlaying the balances. */
+#mode-nav button { background:transparent; color:var(--muted); border-color:transparent; padding:8px; font-size:.84rem; }
+#mode-nav button.active-mode { color:var(--green); border-color:var(--green); background:var(--pale); }
+.notice { position:static; display:flex; justify-content:space-between; align-items:center; gap:12px; box-shadow:none; }
+.notice.error { position:sticky; top:8px; z-index:20; }
+.notice button { flex-shrink:0; padding:2px 10px; }
+#learning-panel { border-top:4px solid var(--green); scroll-margin-top:20px; }
+#learning-panel form { max-width:820px; }
+#learning-panel button { margin:12px 8px 0 0; }
+.final-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.diagnosis { background:#f5f8f1; border:1px solid #cfdccf; border-radius:8px; padding:18px; margin:18px 0; }
+.diagnosis dl { margin:0; }
+.diagnosis dl>div { display:flex; justify-content:space-between; gap:18px; border-bottom:1px solid var(--line); padding:9px 0; font-size:.85rem; }
+.diagnosis dt { color:var(--muted); }
+.diagnosis dd { margin:0; text-align:right; font-weight:600; flex-shrink:0; }
+.diagnosis p { font-size:.85rem; margin-top:12px; }
+.next-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.next-actions button { font-size:.8rem; padding:7px 10px; }
+.limit-note { background:#fff6dd; color:#735218; border-left:3px solid var(--gold); padding:12px; font-size:.87rem; }
+.formulas { background:#f5f8f1; padding:16px 20px; border-radius:8px; margin:12px 0; font-size:.85rem; }
+.formulas p:last-child { margin-bottom:0; }
+.event-explanation { margin:14px 0; background:var(--pale); padding:12px; }
+.changes th[scope=row] { background:transparent; text-align:left; font-size:.8rem; }
+.changes td { font-variant-numeric:tabular-nums; }
+.dialog-body details[open] { margin-bottom:20px; }
+@media(max-width:650px) {
+  #mode-nav { flex-wrap:wrap; }
+  #mode-nav button { font-size:.75rem; }
+  .final-fields { grid-template-columns:1fr; }
+  .diagnosis dl>div { display:block; }
+  .diagnosis dd { text-align:left; margin-top:5px; }
+}

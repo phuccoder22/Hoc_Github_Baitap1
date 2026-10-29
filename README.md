@@ -1,73 +1,115 @@
-# O2C Learning Lab — Mốc 1
+# O2C Learning Lab — V1.1
 
-Ứng dụng tiếng Việt để tự thực hành Order to Cash: tạo đơn → Confirm → giữ hàng → Picking → Packing slip → Invoice → Payment → Settlement. Dữ liệu giả định, một kho, hai khách, ba sản phẩm; nhiều đơn, mỗi đơn một dòng.
+Web tiếng Việt giúp người mới phân biệt **thiếu hàng, thiếu hóa đơn, thiếu tiền và thiếu cấn trừ**. Một kho, hai khách, ba sản phẩm; nhiều đơn, mỗi đơn một dòng. Hai chế độ độc lập nhưng dùng chung logic chứng từ, tồn và số dư.
 
 ## Mở trên Windows
 
-1. Tải repository thành ZIP (trên GitHub: **Code → Download ZIP**) hoặc tải thư mục dự án về máy.
-2. Nhấp phải file ZIP → **Extract All / Giải nén tất cả**. Không mở app khi vẫn ở bên trong ZIP.
-3. Mở thư mục đã giải nén, tìm `index.html`. Nhấp phải → **Open with / Mở bằng → Microsoft Edge hoặc Google Chrome**.
-4. Giữ `styles.css` và thư mục `js` cạnh `index.html`. Không chuyển riêng file HTML ra chỗ khác. Nếu JavaScript bị tắt, bật lại trong trình duyệt.
+1. Tải [ZIP trên nhánh phát triển](https://github.com/phuccoder22/Hoc_Github_Baitap1/archive/refs/heads/o2c-moc-1.zip), hoặc chọn đúng nhánh `o2c-moc-1` trên GitHub → **Code → Download ZIP**.
+2. Nhấp phải ZIP → **Extract All / Giải nén tất cả**. Không mở khi vẫn ở trong ZIP.
+3. Mở thư mục giải nén, nhấp phải **index.html → Open with → Edge hoặc Chrome**.
+4. Giữ `styles.css` và toàn bộ `js` cạnh HTML. Không cần mạng, server, npm, Python, API key hoặc tài khoản D365 để dùng app.
 
-Không cần mạng, server, npm, Python, API key hoặc D365 để sử dụng. App không tải CDN/font/dữ liệu ngoài và không fetch file cục bộ. Các lệnh kiểm thử ở cuối README chỉ dành cho người phát triển.
+App dùng script cổ điển, không CDN, font ngoài, API hoặc fetch file cục bộ. Dữ liệu lưu theo trình duyệt/đường dẫn; khi nâng cấp đừng xóa thư mục cũ trước khi tự kiểm tra dữ liệu cần giữ. V1.1 chưa có nhập/xuất bản sao lưu.
 
-## Làm case đầu tiên
+## Học có hướng dẫn
 
-Mỗi biểu mẫu có hai bước: **Xem trước → Ghi nhận**. Xem trước hoặc Quay lại chưa tạo chứng từ. Có câu hỏi để tự dự đoán tác động; mở “Xem tác động dự kiến trước → sau” để đối chiếu. Chưa chấm điểm/bộ bài hướng dẫn trong mốc này.
+Chọn **Học có hướng dẫn** ở đầu trang. Bài dùng riêng `guided`; không thay dữ liệu tự thực hành.
 
-1. **Tạo đơn mới:** chọn Công ty An Phát, Gạch lát nền, số lượng **10**. Header là thông tin chung; Line là hàng/ lượng/giá. Giá mẫu SP01 là 1.000.000 VND, tồn đầu 6; đặt vượt tồn được phép.
-2. Trong đơn đang chọn, chọn **Confirm đơn bán** → Xem trước → Ghi nhận. Không giảm tồn hoặc sinh invoice.
-3. Chọn **Giữ hàng**, nhập **6**, ghi nhận. Đơn giữ 6; tồn thực tế vẫn 6, khả dụng còn 0. Lab chỉ giữ vật lý đang có; ERP thật có thể có chính sách khác.
-4. Chọn **Picking — lấy hàng**, nhập **6**, ghi nhận. Hàng được lấy nhưng vẫn nằm trong tồn và lượng giữ.
-5. Chọn **Giao hàng — Packing slip**, nhập **6**, ghi nhận. Tồn, giữ và lấy chưa giao về 0; đơn còn **4 Còn chờ giao (Backorder)**. PackingSlip là bản ghi giao hàng duy nhất, không thêm Shipment.
-6. Chọn **Lập hóa đơn**, chọn phiếu PS của đơn, nhập **6**, ghi nhận. Invoice là 6.000.000 VND.
-7. Ở khu vực kế toán, kiểm tra khách đang xem là **Công ty An Phát**. Ghi nhận payment **4.000.000**. Khi này O/U/N = **6/4/2 triệu**: invoice vẫn mở 6, payment chưa cấn trừ 4, ròng 2.
-8. Chọn payment PAY và invoice I của cùng khách, nhập settlement **4.000.000**, ghi nhận. O/U/N = **2/0/2 triệu**. **Payment 4 triệu dùng hết; invoice 6 triệu còn mở 2 triệu; đơn còn 4 sản phẩm chờ giao.** Settlement không giảm ròng thêm lần nữa.
+1. Đọc vai trò và chỉ dẫn của bước.
+2. Chọn đáp án **dự đoán trước thao tác** → **Kiểm tra dự đoán**.
+3. Khi đúng, chọn **Xem trước bước này**. Bảng trước/sau mở sẵn; đọc lý do rồi **Ghi nhận** nếu đồng ý.
+4. Trả lời câu **giải thích tác động** sau thao tác. Sai được xem giải thích và thử lại, không tạo lại chứng từ.
+5. Lặp đến đủ tám thao tác rồi làm kiểm tra cuối bằng số tiền VND, lượng còn chờ giao và lý do.
 
-Dòng chứng từ theo đơn và Nhật ký nghiệp vụ giúp đối chiếu. Case này có đúng **8 sự kiện nghiệp vụ**, không đếm xem trước/dự đoán/lưu. Đơn chưa hoàn tất. Muốn thử đơn hoàn tất, đặt lại rồi đặt/giao/invoice **2**, payment **2 triệu**, settlement **2 triệu**.
+Case: đặt 10 SP01, tồn 6, giao 6, invoice 6 triệu, payment 4 triệu, settlement 4 triệu. Sau payment O/U/N=6/4/2 triệu; sau settlement là **2/0/2 triệu**. Payment 4 triệu dùng hết; invoice 6 triệu còn mở 2 triệu; còn 4 sản phẩm chờ giao.
 
-## Tự thử thêm
+Chỉ khi trạng thái thật và các câu trả lời đều đúng, app hiện **“Bài học hoàn thành; đơn chưa hoàn tất”**. Có đúng 8 sự kiện nghiệp vụ; dự đoán/trả lời/xem lại/lưu không thêm sự kiện. Tải lại giữ bước và câu hỏi nếu localStorage đã lưu được; không tự làm lại nghiệp vụ đã xong.
 
-- Chọn các nút SO để đổi đơn; có thể tạo nhiều đơn cùng sản phẩm. Giữ/lấy/giao chỉ dùng nguồn của đúng đơn, ứng dụng tự phân bổ theo thứ tự tạo.
-- Có thể giữ/lấy/giao/invoice từng phần; invoice phải chọn phiếu giao còn lượng chưa xuất.
-- Có thể ghi payment trước invoice. Settlement là bước riêng; một payment trả được nhiều invoice của **cùng khách**, kể cả khác đơn. Không chuyển payment sang khách khác.
-- “Còn chờ giao” là số lượng đặt trừ đã giao, không phải số tiền nợ. Ba trạng thái giao, invoice và trả tiền được hiển thị riêng. Ròng 0 chưa bảo đảm invoice đã được settlement.
-- Thử chuỗi **giữ 6, lấy 4, giao 3**: thực tế 3; giữ 3; khả dụng 0; lấy chưa giao 1.
+## Tự thực hành: hoàn tất một đơn nhỏ
 
-## Lưu và đặt lại
+Chọn **Tự thực hành → Bắt đầu bài đơn 2 sản phẩm**. App hỏi xác nhận vì sẽ thay riêng dữ liệu practice bằng dữ liệu mới. Hủy thì giữ nguyên; guided không bị xóa. Bắt đầu bài chưa tạo đơn hoặc chứng từ nào.
 
-App tự thử lưu bằng localStorage của trình duyệt sau mỗi nghiệp vụ. Xem thông báo lưu ở đầu trang; nút **Thử lưu lại** không chạy lại nghiệp vụ hoặc tạo thêm chứng từ.
+Bạn tự làm từng thao tác, mỗi lần **Xem trước → Ghi nhận**:
 
-- **Đã lưu:** có thể tải lại ở cùng trình duyệt/đường dẫn. `file://` và chế độ riêng tư phụ thuộc chính sách trình duyệt; hãy tự thử tải lại một đơn nhỏ trước khi làm lâu.
-- **Chưa lưu / phiên tạm:** vẫn thao tác trong bộ nhớ, nhưng đóng/tải lại có thể mất dữ liệu. Thử lưu lại khi trình duyệt cho phép. **Mốc 1 chưa có nhập/xuất JSON hoặc bản sao lưu tải xuống**, đừng đóng trang nếu cần giữ dữ liệu phiên chưa lưu.
-- Đọc dữ liệu lỗi/không hỗ trợ: dùng phiên tạm và giữ nguyên bản lưu cũ, không tự ghi đè. Chỉ **Đặt lại thực hành → Đồng ý đặt lại** mới cho thay bằng dữ liệu mẫu.
-- Hủy hộp thoại đặt lại không đổi dữ liệu. Đồng ý đặt lại xóa toàn bộ chứng từ practice; không chạm guided. Reset không tạo sự kiện nghiệp vụ mới.
+| Bước | Chọn / nhập |
+| --- | --- |
+| Tạo đơn mới | Công ty An Phát, SP01 Gạch lát nền, lượng **2**, giá chốt **1 triệu** |
+| Confirm đơn bán | Xác nhận nội dung; chưa giảm tồn |
+| Giữ hàng | **2** cho đúng đơn |
+| Picking | **2** từ phần đã giữ |
+| Giao hàng — Packing slip | **2**; đây là lần giao duy nhất, không có Shipment bổ sung |
+| Lập hóa đơn | Chọn phiếu giao của đơn, lượng **2** → invoice 2 triệu |
+| Ghi nhận thanh toán | Đúng khách An Phát, **2000000** VND |
+| Settlement | Chọn payment/invoice cùng khách, **2000000** VND |
 
-Chỉ mở **một tab**. Chưa xử lý nhiều tab, migration hoặc đồng bộ; đổi đường dẫn thư mục, trình duyệt hay xóa dữ liệu trình duyệt có thể mất liên kết với dữ liệu cũ. Không dùng lab làm sổ kế toán thật.
+Sau payment: O/U/N=2/2/0 triệu nhưng invoice vẫn mở, đơn chưa hoàn tất. Chỉ sau giao đủ, invoice đủ và các invoice của đơn hết số dư, app mới công nhận đơn và bài practice hoàn tất. Không tự nhận tiền, phân bổ hoặc đóng đơn thay bạn.
 
-## Phạm vi hiện có và để sau
+Bạn vẫn có thể tự tạo nhiều đơn và xử lý từng phần ngoài bài mẫu. Chọn các nút SO để xem đơn; nguồn giữ/lấy được app tự phân bổ theo thứ tự tạo và đúng đơn, không cần chọn ID kỹ thuật.
 
-Mốc 1 có tự thực hành đầy đủ tám thao tác, số liệu từ chứng từ, phân bổ tự động, lỗi nghiệp vụ không sửa trạng thái, xem trước và chống xác nhận trùng. Có cấu trúc dataset `practice`/`guided` riêng và chung một domain; **chưa có giao diện/bộ bài guided**. Ngân hàng 18 tình huống trong docs dùng làm nguồn kiểm tra, không phải 18 bài đã xây.
+## Đọc lý do đơn chưa hoàn tất
 
-Không có thuế, giá vốn, doanh thu kế toán, GL, X++, credit management, aging, collections, tích hợp, nhập kho, nhiều dòng/kho, sửa/hủy chứng từ. Có thể còn chờ giao vì thiếu hàng; đó là kết quả hợp lệ, không tự tăng tồn để đóng đơn. Đây không phải bản sao D365.
+Trong chi tiết đơn có bốn số khác nhau:
 
-## Kiểm thử dành cho người phát triển
+- **Còn chờ giao:** lượng đặt trừ lượng đã giao, còn gọi Backorder; không phải tiền nợ.
+- **Đã giao nhưng chưa lập hóa đơn:** phần có thể invoice ngay.
+- **Chưa giao nên chưa đủ điều kiện lập hóa đơn:** phần chưa được invoice trong simulator.
+- **Số dư mở invoice thuộc riêng đơn:** chỉ cộng invoice của đơn đó.
 
-Không cần thực hiện phần này để mở app.
+Nút “Đi đến…” chỉ mở/chọn form phù hợp, không tạo chứng từ. Nếu kho thiếu, lab giải thích giới hạn chưa nhập kho và vẫn cho xử lý phần đủ điều kiện; không tự tăng tồn.
 
-- Logic nghiệp vụ và lưu (chỉ Node.js, không package ngoài): `node tests/domain.test.cjs`.
-- Trình duyệt: có Playwright và Chromium trong môi trường phát triển, chạy `node tests/browser-smoke.cjs`. Mặc định thử `file://`; cấu hình đường dẫn bằng `CHROMIUM_PATH` nếu cần.
-- Khi môi trường quản lý chặn `file://`: trên Linux dùng `O2C_TEST_TRANSPORT=route node tests/browser-smoke.cjs` để kiểm giao diện/localStorage qua origin ảo cấp từ file dự án, không kết nối mạng ngoài hay server. Kết quả này **không xác nhận file:// hoặc Windows**.
+**Payment thuộc khách, không thuộc riêng đơn.** Nếu hai đơn cùng khách dư invoice 2 và 3 triệu, khách có U=4 triệu, thì U dùng chung là 4 triệu, không phải mỗi đơn đã được dành riêng 4 triệu. Bạn chọn payment/invoice và số tiền khi settlement. Phần thiếu tiền ròng của khách cũng không được gán làm dư riêng từng đơn.
 
-### Kết quả kiểm tra thực tế ngày 28/10/2026
+## Ba số dư và nhật ký
+
+Phần **“Đã nhận tiền — cần xác định tiền trả hóa đơn nào”** hiển thị số liệu thực:
+
+- **O = tổng hóa đơn − tổng settlement:** invoice còn mở.
+- **U = tổng payment − tổng settlement:** tiền đã ghi nhận chưa cấn trừ.
+- **N = O − U = tổng hóa đơn − tổng payment:** số dư ròng khách.
+
+N dương: khách thiếu tiền ròng so với tổng invoice đã lập. N=0: hai tổng bằng nhau nhưng invoice cụ thể có thể vẫn mở. N âm: khách có tiền dư trong mô hình. N không phải số dư riêng của một đơn.
+
+Settlement **dùng tiền đã nhận, không nhận thêm tiền**: O và U giảm cùng số tiền, N không đổi. Không tự settlement khi N=0.
+
+Mở từng dòng trong **Nhật ký nghiệp vụ** để xem chứng từ, lượng/tiền, lý do và bảng trước/sau, kể cả Tạo đơn/Confirm không đổi tồn/tiền. Mở/đóng nhật ký không chạy lại nghiệp vụ. Preview dùng cùng phép tính nghiệp vụ trên bản sao; Ghi nhận kiểm tra lại state hiện tại.
+
+## Lưu, chuyển chế độ và đặt lại
+
+App tự thử lưu dataset đầy đủ của chế độ hiện tại vào localStorage. Hash `#guided`/`#practice` giữ chế độ khi tải lại. Dữ liệu/tiến độ hai chế độ dùng hai khóa riêng; chuyển qua lại không sao chép hoặc trộn chứng từ.
+
+- **Đã lưu:** có thể tải lại ở cùng trình duyệt/đường dẫn; hãy thử một bước nhỏ trước khi học lâu vì `file://` tùy chính sách trình duyệt.
+- **Chưa lưu / phiên tạm:** vẫn thao tác và đổi chế độ trong phiên, nhưng đóng/tải lại có thể mất phần chưa lưu. **Thử lưu lại** không tạo lại nghiệp vụ. Chưa có xuất JSON hoặc bản sao lưu tải xuống.
+- Đọc dữ liệu hỏng/không hỗ trợ: giữ nguyên bản lưu cũ, báo phiên tạm, không âm thầm ghi đè. Tiến độ guided không khớp case cũng không được coi đã hoàn thành.
+- **Đặt lại** hỏi xác nhận, chỉ xóa chứng từ và tiến độ của chế độ đang chọn. Chế độ khác giữ nguyên. “Bắt đầu bài đơn 2” cũng cần xác nhận thay riêng practice.
+
+Chỉ dùng một tab. Không hỗ trợ migration, cộng tác hoặc đồng bộ; đổi đường dẫn/trình duyệt hay xóa dữ liệu trình duyệt có thể không còn thấy dữ liệu cũ. Dữ liệu mốc 1 cùng schema/khóa vẫn đọc được; không sửa lịch sử cũ chỉ để thêm bảng nhật ký.
+
+## Giới hạn
+
+Chưa có nhập kho, thuế, giá vốn, doanh thu kế toán, GL, credit management, aging, collections, X++, tích hợp, AI/API, nhiều dòng/kho, sửa/hủy/đảo chứng từ hoặc nhập/xuất JSON. Chỉ giữ vật lý hiện có là giới hạn lab, không phải luật của mọi ERP. D365 có các biến thể reservation, invoicing và settlement tùy cấu hình.
+
+V1.1 có một case guided và một bài practice hoàn tất đơn 2. Ngân hàng 18 tình huống trong docs không phải 18 bài đã xây. Đây là mô phỏng học tập, không phải bản sao D365 hoặc sổ kế toán thật.
+
+## Kiểm tra dành cho người phát triển
+
+Người dùng cuối không cần thực hiện phần này.
+
+- `node tests/domain.test.cjs`: nghiệp vụ/lưu mốc 1, dùng Node test/assert tích hợp sẵn.
+- `node tests/v11.test.cjs`: lịch sử, chẩn đoán, công thức, tiến độ/đáp án thật, cô lập và bài đơn 2.
+- `node tests/browser-smoke.cjs` và `node tests/v11-browser.cjs`: cần Playwright và Chromium chỉ trong môi trường phát triển; mặc định thử `file://`. Có thể chọn executable bằng `CHROMIUM_PATH`.
+- Nếu môi trường chặn file://, trên Linux chạy riêng `O2C_TEST_TRANSPORT=route node tests/browser-smoke.cjs` và `O2C_TEST_TRANSPORT=route node tests/v11-browser.cjs`. Origin ảo chỉ cấp các file của dự án, mạng tắt, không server/API ngoài. Kết quả này **không xác nhận file:// hoặc Windows**.
+
+### Kết quả thực tế V1.1 ngày 29/10/2026
 
 | Kiểm tra | Kết quả |
 | --- | --- |
-| `node tests/domain.test.cjs` — Node 24.19.0 | **18/18 đạt**, không skip; gồm case chính, TH02/04/05/06/07/08/09/12/18 và kiểm tra bổ sung về lỗi, lưu, mode, xác nhận trùng |
-| `O2C_TEST_TRANSPORT=route node tests/browser-smoke.cjs` — Chromium 154.0.8037.57, Linux | **5/5 đạt** trên origin ảo do bộ kiểm thử cấp file, mạng tắt; không request dịch vụ ngoài. Kiểm case/ba số dư, reload, tạo nhiều đơn, partial, đơn nhỏ hoàn tất, double-confirm đơn/payment, lỗi quota/quyền, dữ liệu hỏng, reset/cancel và không xóa guided |
-| `node tests/browser-smoke.cjs` — mở trực tiếp file | **Bị môi trường chặn**, Chromium trả `ERR_BLOCKED_BY_ADMINISTRATOR` ở điều hướng `file://`. Chưa kiểm chứng app hoặc localStorage trên file:// |
-| Edge/Chrome trên Windows, giải nén thư mục có dấu/khoảng trắng | **Chưa chạy**; môi trường hiện tại là Linux. Cần kiểm nghiệm thu Windows riêng |
+| Nghiệp vụ/lưu mốc 1 (`domain.test.cjs`), Node 24.19.0 | **18/18 đạt**, 0 thất bại, 0 bỏ qua |
+| Logic V1.1 (`v11.test.cjs`) | **12/12 đạt**, gồm fixture dữ liệu thật tạo từ mã mốc 1 commit e21134b; 0 thất bại, 0 bỏ qua |
+| Hồi quy trình duyệt (`browser-smoke.cjs`, transport route) | **5/5 nhóm đạt**: case chính, nhiều đơn/partial, double-confirm đơn và payment, reload, lỗi quota/quyền, dữ liệu hỏng và reset/cancel |
+| Trình duyệt V1.1 (`v11-browser.cjs`, transport route) | **6/6 nhóm đạt**: nhật ký/preview thật, hai đơn cùng khách, N=0/N âm, guided đủ bước/sai/thử lại/reload/cô lập, bài đơn 2 và lỗi lưu tiến độ |
+| `v11-browser.cjs` mặc định mở file trực tiếp | **Bị môi trường chặn** ngay khi điều hướng: `ERR_BLOCKED_BY_ADMINISTRATOR` trên file://. Chưa chạy các ca app bằng file:// |
+| Edge/Chrome Windows, thư mục giải nén có dấu/khoảng trắng | **Chưa chạy**; không nghiệm thu Windows |
 
-Đã rà cú pháp JavaScript, khoảng trắng diff và ảnh giao diện desktop/390px; không tràn ngang toàn trang ở kích thước đã kiểm. Chưa thấy lỗi ứng dụng còn tái hiện trong các kiểm tra đã chạy. Giới hạn chưa giải quyết: file:// bị chính sách môi trường chặn nên chưa thể nhận nghiệm thu mở file trực tiếp; localStorage qua origin ảo không chứng minh hành vi file://. Các phần ngoài mốc 1 được liệt kê ở trên, không được coi là đã triển khai.
+Kiểm tra trình duyệt đã chạy trên Chromium 154.0.8037.57/Linux headless, origin ảo phục vụ file địa phương, mạng tắt, không request dịch vụ ngoài. Không có lỗi JavaScript chưa xử lý trong các luồng đã chạy. Đã kiểm bảng lịch sử/preview nhìn thấy dữ liệu trên giao diện, không chỉ kiểm hàm tính. Không còn ca app thất bại trong các suite đã hoàn tất; file:// và Windows vẫn là giới hạn chưa kiểm chứng. Tài liệu/lịch sử mốc 1 không được coi là bằng chứng nghiệm thu Windows.
 
- Tài liệu thiết kế hiện hành ở `docs/`. `review-o2c.md` là bản ghép nguyên văn trước lần triển khai này, được giữ nguyên theo yêu cầu trước, không là bản cập nhật tự động.
+ Tài liệu hiện hành ở docs. `review-o2c.md` giữ nguyên bản ghép thiết kế cũ, không cập nhật tự động và không là nguồn quy tắc V1.1.

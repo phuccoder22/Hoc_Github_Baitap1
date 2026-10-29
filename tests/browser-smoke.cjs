@@ -19,7 +19,7 @@ let passed = 0;
       const context = await browser.newContext({ offline: true, viewport: { width: 1440, height: 1000 } });
       if (transport === 'route') {
         // Test-only virtual HTTPS origin, all responses served from local files. No server or remote connection.
-        const assets = new Set(['index.html', 'styles.css', 'js/seed.js', 'js/domain.js', 'js/storage.js', 'js/app.js']);
+        const assets = new Set(['index.html', 'styles.css', 'js/seed.js', 'js/domain.js', 'js/insights.js', 'js/lessons.js', 'js/storage.js', 'js/app.js']);
         await context.route('https://o2c.test/**', route => {
           const name = new URL(route.request().url()).pathname.slice(1);
           if (!assets.has(name)) return route.fulfill({ status: 404, body: 'Not found' });

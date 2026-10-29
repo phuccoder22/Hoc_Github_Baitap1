@@ -8,19 +8,25 @@ Bối cảnh V1: một công ty phân phối, một kho, hai khách hàng, ba s�
 
 ### Quyết định đã xác nhận và tài liệu tham khảo
 
-- Yêu cầu trong hội thoại là căn cứ phạm vi: tách O2C chung/D365; bổ sung Header/Line, Confirm, Picking, Packing slip, Backorder, Settlement; tách ba số dư; dùng case đặt 10, tồn 6, giao 6, invoice 6 triệu, payment 4 triệu, settlement 4 triệu; kiểm tra trạng thái và hiểu tác động. Yêu cầu mới cho phép triển khai mốc 1 tự thực hành.
+- Yêu cầu trong hội thoại là căn cứ phạm vi: tách O2C chung/D365; bổ sung Header/Line, Confirm, Picking, Packing slip, Backorder, Settlement; tách ba số dư; dùng case đặt 10, tồn 6, giao 6, invoice 6 triệu, payment 4 triệu, settlement 4 triệu; kiểm tra trạng thái và hiểu tác động. Yêu cầu V1.1 triển khai hai chế độ dùng chung nghiệp vụ.
 - Đã đọc file người dùng cung cấp `memory_O2C.md` (được nhắc ban đầu là `memory_O2C(1).md`). File là ghi chú tham khảo, không phải danh sách yêu cầu được duyệt. Chọn phần thuật ngữ và case phù hợp với quyết định trong hội thoại.
 - Không kế thừa kết luận “đã hoàn tất O2C nhập môn”, định hướng nghề developer hay lộ trình X++ trong memory thành trạng thái/nhiệm vụ của người học. Các ví dụ credit hold, aging, collections không trở thành tính năng V1.
 - Các lựa chọn cụ thể như giá seed, một dòng/đơn, biểu diễn Picking và không nhập thêm hàng là giả định thiết kế V1 ở mục 3; không gán chúng thành quy luật ERP hoặc quyết định đã có trong memory.
 - Nguồn Microsoft Learn và nội dung đối chiếu nằm ở [business-rules.md, mục 10](business-rules.md#10-nguồn-microsoft-learn-và-phạm-vi-đối-chiếu).
 
-## Phạm vi mốc 1 đã điều chỉnh
+## Phạm vi V1.1 hiện hành
 
-Mốc 1 xây **một không gian tự thực hành** đủ tám thao tác, nhiều đơn một dòng, phân bổ tự động theo đúng đơn, tồn và O/U/N từ chứng từ, dòng chứng từ, lỗi dễ hiểu, localStorage cơ bản và đặt lại có xác nhận. Có kiểm tra mở file ngoại tuyến và hành vi lưu ngay ở mốc này; nghiệm thu Edge/Chrome Windows đầy đủ vẫn ở mốc cuối. Guided chỉ chuẩn bị dataset riêng và dùng chung domain, chưa có bài hướng dẫn hoàn chỉnh hay nút công nhận hoàn thành.
+V1.1 mở rộng mốc 1, giữ nguyên tám nghiệp vụ và quy tắc tồn/số dư. Mục tiêu: người mới phân biệt **thiếu hàng, thiếu hóa đơn, thiếu tiền và thiếu cấn trừ**.
 
-Các phần mô tả guided bên dưới là thiết kế cho mốc sau. **Chưa làm trong mốc 1:** nhập/xuất JSON, migration, nhiều tab và xây đủ 18 bài. Ngân hàng 18 tình huống là nguồn kiểm tra; mốc 1 chỉ có case mẫu để tự thao tác, không có 18 màn hình bài tập. Khi lưu lỗi phải báo nguy cơ mất dữ liệu phiên, cho thử lưu lại/đặt lại; không hứa có xuất JSON.
+- **Nhật ký:** mọi sự kiện có chứng từ, lượng/tiền, lời giải thích và bảng trước/sau có dữ liệu. Tạo đơn/Confirm hiện cả lượng đặt/trạng thái và số không đổi. Settlement hiện O/U giảm, N không đổi; không mô tả là nhận tiền mới. Xem lại chỉ đọc chứng từ theo sequence, không execute hoặc ghi dữ liệu.
+- **Chi tiết đơn:** hiển thị còn chờ giao, đã giao chưa invoice, chưa giao nên chưa đủ điều kiện invoice và dư mở invoice riêng đơn; có nút đi đến thao tác hợp lệ. Khi kho thiếu, giải thích giới hạn chưa nhập kho, không tăng tồn thay người học.
+- **Tiền của khách:** hiển thị các tổng thực và phép tính O/U/N; N dương/0/âm được giải thích. U là tiền dùng chung của khách, chưa dành cho đơn đang xem; thiếu tiền ròng hiển thị ở cấp khách, không dùng làm dư riêng của đơn. N=0 không tự đóng invoice hoặc settlement.
+- **Xem trước:** bảng và lời giải thích mở sẵn, tính bằng cùng Domain.execute trên bản sao. Chỉ Ghi nhận mới execute lại trên trạng thái hiện tại; chống request trùng và đổi chế độ khi đang xem trước.
+- **Guided:** một case đặt 10/tồn 6/giao 6/invoice 6 triệu/payment 4 triệu/settlement 4 triệu. Mỗi bước có vai trò, dự đoán có cấu trúc trước thao tác và kiểm tra lý do sau thao tác. Sai được thử lại mà không tạo chứng từ. Kiểm tra cuối dựa cả câu trả lời và dữ liệu thật; kết thúc ghi rõ “Bài học hoàn thành; đơn chưa hoàn tất”.
+- **Practice:** tự xử lý nhiều đơn như mốc 1; thêm bài hoàn tất đơn 2 SP01 từ dữ liệu mới, giá 1 triệu. Bắt đầu/đặt lại bài cần xác nhận xóa riêng practice; không tạo đơn hoặc xử lý hàng/tiền thay người học. Hoàn thành chỉ khi giao đủ, invoice đủ và các invoice của đơn hết dư.
+- **Cô lập:** hai khóa guided/practice, cùng seed/domain. URL #guided/#practice giữ chế độ khi tải lại; trạng thái học nằm ở lessonProgress của đúng dataset. Học, xem trước, lưu/retry/reset không tạo Event nghiệp vụ; case chuẩn đúng 8 Event.
 
-Sự kiện nghiệp vụ chỉ có tám loại thao tác; dự đoán, trả lời câu hỏi, xem giải thích, lưu/tải dữ liệu và đặt lại không thêm sự kiện nghiệp vụ. Case tạo đủ tám chứng từ nghiệp vụ có đúng 8 sự kiện (header/line tạo cùng một lần).
+**Ngoài V1.1:** nhập kho, thuế, giá vốn, doanh thu kế toán, GL, credit management, aging, collections, X++, integrations, AI/API, nhập/xuất JSON, migration và nhiều tab. Ngân hàng 18 tình huống không phải 18 bài đã xây. Lưu lỗi báo nguy cơ mất phiên, không hứa có sao lưu tải xuống.
 
 ## 2. Ba lớp nội dung học
 
@@ -55,7 +61,7 @@ Lộ trình học minh họa: **Sales Order (Header/Line) → Confirm → Reserv
 | Hoàn tất đơn | Giao đủ, invoice đủ lượng đặt, mọi invoice của đơn hết số dư | Đây là chỉ tiêu của lab; không ánh xạ trực tiếp vào D365 Sales order status “Invoiced” |
 | Vai trò | Bán hàng, kho, kế toán là vai trò học tập | Không đăng nhập hoặc phân quyền thật |
 | Sửa sai | Chứng từ đã ghi nhận không sửa/xóa; có xem trước và đặt lại bộ dữ liệu | Chưa có hủy, giải phóng giữ, trả hàng, hoàn tiền, đảo settlement hoặc chứng từ đảo |
-| Lưu tại máy | localStorage riêng từng chế độ; mốc 1 có chế độ bộ nhớ khi lưu lỗi; sao lưu JSON để mốc sau | `file://` tùy trình duyệt, dữ liệu có thể tách theo đường dẫn; chỉ hỗ trợ một tab |
+| Lưu tại máy | localStorage riêng từng chế độ; V1.1 có chế độ bộ nhớ khi lưu lỗi; chưa có sao lưu JSON | `file://` tùy trình duyệt, dữ liệu có thể tách theo đường dẫn; chỉ hỗ trợ một tab |
 
 **Ngoài phạm vi triển khai đầu:** X++, extensions, integrations, credit management/credit hold, aging, collections, thuế, doanh thu kế toán, giá vốn, bút toán sổ cái, đối soát ngân hàng, nhiều kho, nhiều dòng đơn, mua hàng/nhập kho, cộng tác nhiều người. Nhật ký sự kiện của lab không phải payment journal hay sổ cái D365. Không mở rộng phạm vi chỉ vì các chủ đề này xuất hiện trong memory hoặc nguồn đọc thêm.
 
@@ -74,7 +80,7 @@ Giới thiệu O2C chung, hai chế độ, trạng thái lưu và giới hạn h
 - **Ghi nhận payment:** chọn khách và số tiền; xem trước tác động ba số dư; không tự settlement. Câu “Payment đã ghi nhận” không đồng nghĩa “Invoice đã trả đủ”.
 - **Settlement (cấn trừ thanh toán):** chọn payment và invoice cùng khách, nhập số tiền, hiển thị giới hạn hai phía và ba số dư trước/sau. Bộ lọc giúp chọn đúng nhưng kiểm tra nghiệp vụ vẫn bắt buộc.
 - **Dòng chứng từ và nhật ký:** mở từng SO/header-line → confirmation → reservation → picking → packing slip → invoice → settlement → payment. Payment liên kết theo khách, có thể có trước SO; không vẽ nó như chứng từ con bắt buộc của một đơn. Nhật ký lưu vai trò học tập, số thứ tự, thời gian, mã liên quan, trước/sau; thao tác bị chặn không thành chứng từ thành công.
-- **Dữ liệu:** mốc 1 lưu/thử lưu lại và đặt lại practice có xác nhận; không xóa guided. Xuất/nhập JSON để mốc sau.
+- **Dữ liệu:** V1.1 lưu cả chứng từ và tiến độ học, đặt lại có xác nhận chỉ cho chế độ đang chọn. Xuất/nhập JSON để mốc sau.
 
 ### Học có hướng dẫn
 
@@ -92,7 +98,7 @@ Mỗi thao tác: nhập → xem trước → xác nhận thao tác → kiểm tr
 
 Nhãn tiếng Việt kèm thuật ngữ Anh khi cần; không chỉ dùng màu để báo trạng thái; có nhãn trường, lỗi gần trường và dùng bàn phím được. Ưu tiên máy tính Windows, vẫn đọc được khi thu hẹp cửa sổ.
 
-Khi lưu thất bại, giữ trạng thái hợp lệ trong bộ nhớ và hiện liên tục “Chưa lưu trên máy; đóng trang có thể mất dữ liệu”; có thử lưu lại. Mốc 1 chưa có xuất JSON; đóng trang khi chưa lưu có thể mất dữ liệu phiên. Không báo đã lưu nếu chỉ cập nhật bộ nhớ. Dữ liệu hỏng/khác phiên bản không bị ghi đè tự động; cho bảo toàn dữ liệu gốc và đặt lại có xác nhận. Chi tiết ở business-rules.
+Khi lưu thất bại, giữ trạng thái hợp lệ trong bộ nhớ và hiện liên tục “Chưa lưu trên máy; đóng trang có thể mất dữ liệu”; có thử lưu lại. V1.1 chưa có xuất JSON; đóng trang khi chưa lưu có thể mất dữ liệu phiên. Không báo đã lưu nếu chỉ cập nhật bộ nhớ. Dữ liệu hỏng/khác phiên bản không bị ghi đè tự động; cho bảo toàn dữ liệu gốc và đặt lại có xác nhận. Chi tiết ở business-rules.
 
 ## 6. Tiêu chí thành công
 

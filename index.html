@@ -4,18 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>O2C Learning Lab — Tự thực hành</title>
+  <title>O2C Learning Lab — V1.1</title>
   <link rel="stylesheet" href="styles.css">
   <script src="js/seed.js" defer></script>
   <script src="js/domain.js" defer></script>
+  <script src="js/insights.js" defer></script>
+  <script src="js/lessons.js" defer></script>
   <script src="js/storage.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="#main"><span class="brand-icon" aria-hidden="true">↗</span> O2C <span>Learning Lab</span></a>
-    <nav aria-label="Chế độ"><span class="active-mode">● Tự thực hành</span><span class="future-mode">Học có hướng dẫn · mốc sau</span></nav>
-    <span class="offline-badge">Ngoại tuyến · Mốc 1</span>
+    <nav id="mode-nav" aria-label="Chế độ"><button type="button" data-mode="practice">Tự thực hành</button><button type="button" data-mode="guided">Học có hướng dẫn</button></nav>
+    <span class="offline-badge">Ngoại tuyến · V1.1</span>
   </header>
   <main id="main">
     <noscript>Ứng dụng cần bật JavaScript trong Edge hoặc Chrome. Không cần kết nối mạng.</noscript>
@@ -24,7 +26,8 @@
       <aside class="case-card"><span class="eyebrow">CASE ĐỂ BẮT ĐẦU</span><h2>Đặt 10. Kho có 6.</h2><p>Giao 6 → hóa đơn 6 triệu → nhận 4 triệu → cấn trừ 4 triệu.</p><p class="small">Kết quả: payment dùng hết, invoice còn mở 2 triệu, còn 4 sản phẩm chờ giao. Bạn tự nhập từng thao tác.</p></aside>
     </section>
     <div class="storage-bar"><p id="storage-status" role="status" aria-live="polite">Đang đọc dữ liệu…</p><div><button id="retry-save" class="quiet" type="button">Thử lưu lại</button><button id="reset" class="quiet danger" type="button">Đặt lại thực hành</button></div></div>
-    <div id="notice" class="notice" role="alert" tabindex="-1" hidden></div>
+    <div id="notice" class="notice" role="alert" tabindex="-1" hidden><span id="notice-text"></span><button id="dismiss-notice" type="button" class="quiet" aria-label="Đóng thông báo">×</button></div>
+    <section id="learning-panel" class="panel" aria-label="Bài học hiện tại"></section>
     <section class="panel" aria-labelledby="inventory-heading">
       <div class="section-title"><div><p class="eyebrow">01 / QUAN SÁT</p><h2 id="inventory-heading">Kho WH01</h2></div><p class="small">Khả dụng = thực tế − đang giữ.<br>Đã lấy chưa giao vẫn nằm trong lượng giữ.</p></div>
       <div class="table-wrap"><table><thead><tr><th>Sản phẩm</th><th>Thực tế</th><th>Đang giữ</th><th>Khả dụng</th><th>Đã lấy chưa giao</th></tr></thead><tbody id="inventory-rows"></tbody></table></div>
@@ -42,10 +45,11 @@
       </div>
     </section>
     <section class="panel" aria-labelledby="money-heading">
-      <div class="section-title"><div><p class="eyebrow">03 / KẾ TOÁN</p><h2 id="money-heading">Tiền đã nhận ≠ hóa đơn đã trả</h2></div><div><label for="finance-customer">Khách hàng đang xem</label><select id="finance-customer"></select></div></div>
+      <div class="section-title"><div><p class="eyebrow">03 / KẾ TOÁN</p><h2 id="money-heading">Đã nhận tiền — cần xác định tiền trả hóa đơn nào</h2></div><div><label for="finance-customer">Khách hàng đang xem</label><select id="finance-customer"></select></div></div>
       <div id="balance-cards" class="balance-grid"></div>
+      <div id="balance-formulas" class="formulas" aria-live="polite"></div>
       <p class="small">Số dư ròng = hóa đơn còn mở − thanh toán chưa cấn trừ. Ròng âm là khách có tiền dư trong mô hình; ròng bằng 0 chưa chứng minh từng invoice đã được settlement.</p>
-      <div class="two-columns">
+      <div class="two-columns" id="finance-forms">
         <form id="payment-form" class="form-card"><span class="step-number">A</span><h3>Ghi nhận thanh toán</h3><p class="small">Payment thuộc khách đang xem. Có thể ghi trước khi có hóa đơn; không tự cấn trừ.</p><label for="payment-amount">Số tiền nhận (VND)</label><input id="payment-amount" type="number" min="1" step="1" value="4000000" required><button type="submit">Xem trước payment</button></form>
         <form id="settlement-form" class="form-card"><span class="step-number">B</span><h3>Settlement · cấn trừ</h3><p class="small">Chọn payment và invoice của cùng khách. Một payment có thể trả nhiều invoice cùng khách.</p><label for="settlement-payment">Payment còn số dư</label><select id="settlement-payment" required></select><label for="settlement-invoice">Invoice còn mở</label><select id="settlement-invoice" required></select><label for="settlement-amount">Số tiền cấn trừ (VND)</label><input id="settlement-amount" type="number" min="1" step="1" value="4000000" required><button type="submit">Xem trước settlement</button></form>
       </div>
@@ -53,10 +57,10 @@
     </section>
     <section class="panel" aria-labelledby="flow-heading"><div class="section-title"><div><p class="eyebrow">04 / TRUY VẾT</p><h2 id="flow-heading">Dòng chứng từ</h2></div><span id="flow-order" class="pill"></span></div><p class="small">Theo đơn đang chọn. Nguồn giữ/lấy được ứng dụng tự phân bổ theo thứ tự tạo, không cần chọn ID kỹ thuật.</p><div id="document-flow"></div></section>
     <section class="panel" aria-labelledby="events-heading"><div class="section-title"><div><p class="eyebrow">05 / ĐỐI CHIẾU</p><h2 id="events-heading">Nhật ký nghiệp vụ</h2></div><span id="event-count" class="pill"></span></div><p class="small">Chỉ thao tác nghiệp vụ đã ghi nhận. Xem trước, học, lưu và đặt lại không tạo thêm sự kiện.</p><div id="event-list"></div></section>
-    <section class="knowledge-grid" aria-label="Giới hạn và kiến thức"><article><span class="eyebrow">O2C CHUNG</span><h3>Chuẩn bị khác với giao</h3><p>Confirm xác nhận nội dung. Reservation dành hàng. Picking lấy hàng để chuẩn bị. Packing slip ghi nhận giao; không có một Shipment riêng trừ tồn thêm lần nữa.</p></article><article><span class="eyebrow">LIÊN HỆ D365</span><h3>Quy trình có thể khác</h3><p>D365 có thể giữ nguồn hàng đã đặt nhưng chưa nhận tùy cấu hình; có luồng không đăng ký Picking riêng. Payment và settlement có thể thực hiện cùng lúc hoặc riêng.</p></article><article><span class="eyebrow">GIỚI HẠN SIMULATOR</span><h3>Học một mô hình nhỏ</h3><p>Lab chỉ giữ vật lý hiện có, không nhập thêm hàng, không thuế, giá vốn, doanh thu kế toán, GL hoặc tích hợp. Chỉ mở một tab. Mốc 1 chưa có nhập/xuất JSON và chế độ hướng dẫn.</p></article></section>
+    <section class="knowledge-grid" aria-label="Giới hạn và kiến thức"><article><span class="eyebrow">O2C CHUNG</span><h3>Chuẩn bị khác với giao</h3><p>Confirm xác nhận nội dung. Reservation dành hàng. Picking lấy hàng để chuẩn bị. Packing slip ghi nhận giao; không có một Shipment riêng trừ tồn thêm lần nữa.</p></article><article><span class="eyebrow">LIÊN HỆ D365</span><h3>Quy trình có thể khác</h3><p>D365 có thể giữ nguồn hàng đã đặt nhưng chưa nhận tùy cấu hình; có luồng không đăng ký Picking riêng. Payment và settlement có thể thực hiện cùng lúc hoặc riêng.</p></article><article><span class="eyebrow">GIỚI HẠN SIMULATOR</span><h3>Học một mô hình nhỏ</h3><p>Lab chỉ giữ vật lý hiện có, không nhập thêm hàng, không thuế, giá vốn, doanh thu kế toán, GL hoặc tích hợp. Chỉ mở một tab. V1.1 chưa có nhập/xuất JSON, migration hoặc hỗ trợ nhiều tab.</p></article></section>
     <footer>O2C Learning Lab · Dữ liệu giả định · Số lượng nguyên, VND nguyên · Không phải bản sao D365</footer>
   </main>
-  <dialog id="preview-dialog" aria-labelledby="preview-title"><div class="dialog-body"><p class="eyebrow">KIỂM TRA TRƯỚC KHI GHI NHẬN</p><h2 id="preview-title"></h2><p id="preview-description"></p><aside id="prediction" class="prediction"></aside><details><summary>Xem tác động dự kiến trước → sau</summary><div id="preview-changes"></div></details><p class="small">Xem trước chưa tạo chứng từ. Chỉ khi chọn “Ghi nhận” mới thực hiện nghiệp vụ và thử lưu.</p><div class="dialog-actions"><button id="cancel-preview" class="quiet" type="button">Quay lại</button><button id="commit" type="button">Ghi nhận</button></div></div></dialog>
-  <dialog id="reset-dialog" aria-labelledby="reset-title"><div class="dialog-body"><h2 id="reset-title">Đặt lại dữ liệu thực hành?</h2><p>Tất cả đơn, giữ/lấy/giao, invoice, payment, settlement và nhật ký của practice sẽ bị thay bằng dữ liệu mẫu. Guided không bị thay đổi. Thao tác này không hoàn tác được; mốc 1 chưa có xuất bản sao lưu.</p><div class="dialog-actions"><button id="cancel-reset" class="quiet" type="button">Giữ dữ liệu</button><button id="confirm-reset" class="danger solid" type="button">Đồng ý đặt lại</button></div></div></dialog>
+  <dialog id="preview-dialog" aria-labelledby="preview-title"><div class="dialog-body"><p class="eyebrow">KIỂM TRA TRƯỚC KHI GHI NHẬN</p><h2 id="preview-title"></h2><p id="preview-description"></p><aside id="prediction" class="prediction"></aside><p id="preview-explanation"></p><details open><summary>Xem tác động dự kiến trước → sau</summary><div id="preview-changes"></div></details><p class="small">Xem trước chưa tạo chứng từ. Chỉ khi chọn “Ghi nhận” mới thực hiện nghiệp vụ và thử lưu.</p><div class="dialog-actions"><button id="cancel-preview" class="quiet" type="button">Quay lại</button><button id="commit" type="button">Ghi nhận</button></div></div></dialog>
+  <dialog id="reset-dialog" aria-labelledby="reset-title"><div class="dialog-body"><h2 id="reset-title">Đặt lại dữ liệu thực hành?</h2><p>Tất cả đơn, giữ/lấy/giao, invoice, payment, settlement và nhật ký của practice sẽ bị thay bằng dữ liệu mẫu. Guided không bị thay đổi. Thao tác này không hoàn tác được; V1.1 chưa có xuất bản sao lưu.</p><div class="dialog-actions"><button id="cancel-reset" class="quiet" type="button">Giữ dữ liệu</button><button id="confirm-reset" class="danger solid" type="button">Đồng ý đặt lại</button></div></div></dialog>
 </body>
 </html>

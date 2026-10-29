@@ -63,6 +63,29 @@
     const U = sum(payments, x => paymentBalance(state, x.id));
     return { O, U, N: safe(O - U) };
   }
+  function customerTotals(state, customerId) {
+    find(state.customers, customerId, 'khách hàng');
+    return {
+      invoices: sum(state.invoices.filter(x => customerOfInvoice(state, x) === customerId), x => x.amount),
+      payments: sum(state.payments.filter(x => x.customerId === customerId), x => x.amount),
+      settlements: sum(state.settlements.filter(x => customerOfInvoice(state, find(state.invoices, x.invoiceId, 'hóa đơn')) === customerId), x => x.amount)
+    };
+  }
+  function orderDiagnosis(state, orderId) {
+    const order = header(state, orderId);
+    const item = orderLine(state, orderId);
+    const metrics = lineMetrics(state, item.id);
+    const stock = inventory(state, item.productId);
+    const customer = balances(state, order.customerId);
+    return {
+      ...metrics, orderId, orderLineId: item.id, customerId: order.customerId,
+      notDeliveredForInvoice: metrics.backorder,
+      physicalShortfall: Math.max(0, metrics.reserveRemaining - stock.available),
+      customerUnapplied: customer.U,
+      customerFundingShortfall: Math.max(0, customer.N),
+      customerBalances: customer
+    };
+  }
   function snapshot(state) {
     return {
       inventory: state.products.map(x => ({ productId: x.id, ...inventory(state, x.id) })),
@@ -80,7 +103,7 @@
     });
     state.invoices.forEach(x => { if (invoiceBalance(state, x.id) < 0) fail('Số dư hóa đơn không được âm.'); });
     state.payments.forEach(x => { if (paymentBalance(state, x.id) < 0) fail('Số dư khoản thanh toán không được âm.'); });
-    state.customers.forEach(x => balances(state, x.id));
+    state.customers.forEach(x => { balances(state, x.id); customerTotals(state, x.id); });
   }
   const fields = {
     createOrder: ['customerId', 'productId', 'quantity'], confirmOrder: ['orderId'],
@@ -197,8 +220,10 @@
       if (!event || typeof event.createdAt !== 'string' || !Number.isFinite(Date.parse(event.createdAt))) fail('Sự kiện lưu không hợp lệ.');
       replay = execute(replay, event.command, event.createdAt);
     }
-    if (canonical(replay) !== canonical(state)) fail('Chứng từ hoặc số liệu lưu không khớp lịch sử nghiệp vụ. Dữ liệu cũ được giữ nguyên; hãy đặt lại nếu muốn bắt đầu mới.');
+    if (!state.lessonProgress || typeof state.lessonProgress !== 'object' || Array.isArray(state.lessonProgress)) fail('Dữ liệu học không hợp lệ.');
+    const businessOnly = { ...state, lessonProgress: {} };
+    if (canonical(replay) !== canonical(businessOnly)) fail('Chứng từ hoặc số liệu lưu không khớp lịch sử nghiệp vụ. Dữ liệu cũ được giữ nguyên; hãy đặt lại nếu muốn bắt đầu mới.');
     return state;
   }
-  app.Domain = { BusinessError, execute, validate, inventory, balances, lineMetrics, orderLine, invoiceBalance, paymentBalance, invoiceRemaining, customerOfInvoice, snapshot, labels };
+  app.Domain = { BusinessError, execute, validate, customerTotals, orderDiagnosis, inventory, balances, lineMetrics, orderLine, invoiceBalance, paymentBalance, invoiceRemaining, customerOfInvoice, snapshot, labels };
 })(globalThis);

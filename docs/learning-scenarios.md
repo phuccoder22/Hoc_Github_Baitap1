@@ -26,7 +26,7 @@ KH01 — Công ty An Phát đặt 10 SP01 — Gạch lát nền, giá giả đ�
 
 Mục tiêu là hiểu tình trạng **đang xử lý một phần**, không phải bằng mọi cách hoàn tất đơn. Không tự thêm 4 vào kho hoặc giảm lượng đặt về 6 để có kết quả đẹp. Bài hoàn thành đúng khi người học giải thích được vì sao vẫn còn backorder 4 và invoice mở 2 triệu.
 
-Khi xây guided ở mốc sau, dùng riêng dataset `guided`. Mốc 1 dùng case này như hướng dẫn thao tác thủ công trong `practice`, không xây bộ điều phối bài học. Cả hai khởi đầu theo business-rules: SP01 thực tế 6, giữ 0, khả dụng 6, đã lấy chưa giao 0; chưa có đơn/invoice/payment/settlement; số dư khách bằng 0. KH02, SP02 và SP03 không đổi trong bài. Khi chạy guided ở mốc sau, dataset `practice` không bị tác động; khi tự thử case trong mốc 1, chỉ practice thay đổi.
+V1.1 xây case này trong dataset `guided`, với dự đoán trước thao tác và câu giải thích sau thao tác. Có thể làm thủ công case trong practice nhưng không chia sẻ dữ liệu/tiến độ. Cả hai khởi đầu theo business-rules: SP01 thực tế 6, giữ 0, khả dụng 6, đã lấy chưa giao 0; chưa có đơn/invoice/payment/settlement; số dư khách bằng 0. KH02, SP02 và SP03 không đổi trong bài. Khi chạy guided, practice không bị tác động; khi tự thử case trong practice, guided được giữ nguyên.
 
 ### Tám thao tác và tác động số lượng
 
@@ -58,13 +58,13 @@ Mã SO-01/L-01/CF-01/R-01/PK-01/PS-01/I-01/PAY-01/ST-01 là nhãn trong bài, tr
 
 Không giải thích bước 7 thành “nhận tiền không làm thay đổi bất kỳ số dư công nợ nào”. Câu đúng: chưa giảm **số dư mở invoice**, nhưng đã giảm **số dư ròng khách hàng**.
 
-### Điều kiện qua từng bước và câu hỏi hiểu tác động — dành cho guided ở mốc sau
+### Điều kiện qua từng bước và câu hỏi hiểu tác động — guided V1.1
 
 Mỗi bước cần chứng từ thật hợp lệ **và** câu trả lời đúng. Đáp án dưới đây để người xây dựng kiểm tra, không hiện sẵn trong câu hỏi của app.
 
 | Bước | Điều kiện nghiệp vụ | Câu hỏi và đáp án / giải thích khi sai |
 | --- | --- | --- |
-| 1 | Header đúng KH01/VND/WH01; đúng một line SP01 lượng 10, giá 1.000.000; tạo đơn không đổi tồn/số dư | “Khách hàng nằm ở Header hay Line? Lượng 10 nằm ở đâu?” **Khách ở Header, lượng ở Line**. Hai phần mô tả hai cấp thông tin |
+| 1 | Header đúng KH01/VND/WH01; đúng một line SP01 lượng 10, giá 1.000.000; tạo đơn không đổi tồn/số dư | “Chỉ tạo đơn có giảm tồn hoặc làm O tăng không?” **Không**. Header ghi thông tin chung, Line ghi lượng/giá; đơn mới là nhu cầu, chưa giao hoặc invoice |
 | 2 | CF-01 tham chiếu SO-01, snapshot khớp header/line; không có giao/invoice do Confirm | “Confirm có nghĩa đã giao 10 chưa?” **Chưa**. Xác nhận nội dung khác ghi nhận giao hàng |
 | 3 | R-01 của L-01 có lượng gốc 6; thực tế không giảm; khả dụng lúc thao tác về 0 | “Có phải mọi ERP chỉ giữ được hàng vật lý hiện có?” **Không**. Đây là giới hạn lab; D365 có thể reserve ordered inventory tùy cấu hình |
 | 4 | PK-01 lượng 6 phân bổ đúng R-01; tại thời điểm này đã lấy chưa giao 6, tồn thực tế vẫn 6 | “Lấy 6 rồi kho đã giảm xuống 0 chưa?” **Chưa**. Lab giảm khi ghi nhận Packing slip, không ở Picking |
@@ -75,13 +75,13 @@ Mỗi bước cần chứng từ thật hợp lệ **và** câu trả lời đú
 
 Trả lời sai: chỉ ra nhầm lẫn, cho “Xem lại tác động” và thử lại không giới hạn; không ghi thêm chứng từ hay hoàn tác bước đúng. Các câu hỏi không chỉ hỏi tên nút tiếp theo.
 
-### Kiểm tra cuối bài: giải thích và đối chiếu thực tế — dành cho guided ở mốc sau
+### Kiểm tra cuối bài: giải thích và đối chiếu thực tế — guided V1.1
 
 Chỉ hiện **“Hoàn thành bài học”** khi tất cả điều kiện sau đạt:
 
 1. Đọc lại chứng từ để xác minh: 1 header/line đặt 10; 1 confirmation đúng đơn; 1 reservation 6; 1 picking 6; 1 packing slip 6; 1 invoice 6 triệu; 1 payment 4 triệu; 1 settlement 4 triệu cùng khách. Có đúng 8 sự kiện nghiệp vụ; bất biến toàn dataset hợp lệ; không có chứng từ ngoài case.
 2. Tính lại từ dữ liệu hiện tại: SP01 thực tế/giữ/khả dụng/đã lấy chưa giao = 0/0/0/0; giao 6; backorder 4; invoice lượng 6; O/U/N = 2/0/2 triệu; KH02/SP02/SP03 không đổi. Không tin cờ “complete” trong localStorage hoặc file nhập.
-3. Người học nhập kết quả số cho ba số dư trước/sau settlement và backorder, rồi chọn đúng lý do của từng tác động. Phải phân biệt Confirm/Picking chưa giảm tồn, payment giảm ròng, settlement không nhận thêm tiền. Đây là kiểm tra có cấu trúc, chấm cục bộ bằng đáp án; không giả định app có AI chấm văn bản tự do.
+3. Người học chọn dự đoán trước settlement ở bước 8; cuối bài nhập O/U/N sau settlement (VND) và backorder, rồi chọn đúng lý do của tác động. Phải phân biệt Confirm/Picking chưa giảm tồn, payment giảm ròng, settlement không nhận thêm tiền. Đây là kiểm tra có cấu trúc, chấm cục bộ bằng đáp án; không giả định app có AI chấm văn bản tự do.
 4. Trả lời đúng câu chuyển tình huống: “Invoice 2 triệu, payment 2 triệu chưa settlement: ròng 0 có nghĩa invoice đóng chưa?” **Chưa**; invoice mở 2, payment chưa cấn trừ 2. Chọn đúng lý do thay vì chỉ nhập số 0.
 5. Giải thích đúng **bài đã hoàn thành nhưng đơn chưa hoàn tất**: chưa giao/invoice 4 còn lại, I-01 còn mở 2 triệu; không khẳng định mọi ERP đều không thể giữ 4 hàng dự kiến.
 
@@ -89,17 +89,17 @@ Nếu trạng thái đúng nhưng phần giải thích sai, giữ bài ở “C�
 
 ### Tiến độ, tải lại và xem lại
 
-Guided chỉ mở thao tác của bước hiện hành với đối tượng/lượng của case. Sau thành công chỉ hiện câu hỏi, không cho tạo lại cùng chứng từ. Lưu ID liên kết bước và phiên bản bài để tìm đối tượng, nhưng phải kiểm tra nội dung, quan hệ và bất biến khi tải lại. Tiến độ không suy từ số lần bấm hoặc câu “đã hoàn tất” trong memory.
+Guided chỉ mở thao tác của bước hiện hành với đối tượng/lượng của case. Sau thành công chỉ hiện câu hỏi, không cho tạo lại cùng chứng từ. Dẫn đối tượng từ lệnh và chứng từ của từng bước trong case, lưu phiên bản bài cùng đáp án; phải kiểm tra nội dung, quan hệ và bất biến khi tải lại, không tin cờ hoàn thành. Tiến độ không suy từ số lần bấm hoặc câu “đã hoàn tất” trong memory.
 
 Các số trước/sau là ảnh chụp tại thời điểm từng bước, không là điều kiện đòi dữ liệu hiện tại mãi bằng số cũ. Ví dụ R-01 có lượng gốc 6 nhưng dư giữ về 0 sau giao; invoice mở 6 ở bước 7 và còn 2 sau bước 8. Có thể tính lại trạng thái theo tiền tố sequence của chứng từ bất biến để đối chiếu ảnh chụp sự kiện, không tin riêng trường before/after trong JSON nhập.
 
 Bước hiện tại là bước đầu còn thiếu nghiệp vụ hợp lệ hoặc câu hỏi hiểu tác động. Xem lại bước cũ không chạy lại thao tác. Nếu cấu trúc bài không khớp dữ liệu, báo không thể tiếp tục và cho sao lưu/đặt lại riêng guided, không âm thầm seed hoặc đánh dấu hoàn thành.
 
-**Kết thúc:** payment 4 triệu đã được settlement hết (số dư payment = 0); invoice 6 triệu còn mở 2 triệu, tức invoice mới được settlement một phần; đơn SO-01 còn 4 sản phẩm chờ giao. Bài học ở mốc sau chỉ đạt nếu kiểm tra trên đạt, khác với đơn hoàn tất. Không tự thêm hàng, payment, settlement hoặc đóng đơn sau khi bấm hết bước.
+**Kết thúc:** payment 4 triệu đã được settlement hết (số dư payment = 0); invoice 6 triệu còn mở 2 triệu, tức invoice mới được settlement một phần; đơn SO-01 còn 4 sản phẩm chờ giao. Bài học V1.1 chỉ đạt nếu kiểm tra trên đạt, khác với đơn hoàn tất. Không tự thêm hàng, payment, settlement hoặc đóng đơn sau khi bấm hết bước.
 
 ### Câu hỏi dự đoán trước thao tác (nội dung học)
 
-Trước một số thao tác, hỏi dự đoán, sau đó đối chiếu số liệu thật và giải thích. Mốc 1 có gợi ý dự đoán trong xem trước thao tác; chưa chấm điểm hoặc ghi tiến độ bài hướng dẫn.
+Trước một số thao tác, hỏi dự đoán, sau đó đối chiếu số liệu thật và giải thích. V1.1 guided yêu cầu trả lời có cấu trúc và lưu tiến độ riêng; practice giữ câu gợi dự đoán mà không buộc chấm bài.
 
 | Trước thao tác | Câu hỏi dự đoán | Tác động cần đối chiếu sau đó |
 | --- | --- | --- |
@@ -111,7 +111,7 @@ Trước một số thao tác, hỏi dự đoán, sau đó đối chiếu số l
 
 ## 3. Ngân hàng 18 tình huống và kết quả mong đợi
 
-**Đây là ngân hàng tình huống nghiệp vụ, không phải 18 bài cần xây trong mốc 1.** Mốc 1 không có hệ thống giao/chấm bài. Kiểm chứng tự thực hành bằng case chính và TH02, TH04, TH05, TH06, TH07, TH08, TH09, TH12, TH18; thêm các kiểm tra bắt buộc về giữ 6/lấy 4/giao 3, lỗi lưu, bấm đúp và sự kiện. Các tiêu chí guided, import, migration, nhiều tab ở phần sau chỉ áp dụng mốc tương ứng.
+**Đây là ngân hàng tình huống nghiệp vụ, không phải 18 bài cần xây trong V1.1.** V1.1 có một case guided và một bài practice đơn 2. Kiểm chứng tự thực hành bằng case chính và TH02, TH04, TH05, TH06, TH07, TH08, TH09, TH12, TH18; thêm các kiểm tra bắt buộc về giữ 6/lấy 4/giao 3, lỗi lưu, bấm đúp và sự kiện. Guided đã thuộc V1.1; import, migration và nhiều tab vẫn ngoài phạm vi.
 
 Mỗi ca bắt đầu với seed mới của `practice` (SP01 tồn 6, giá 1 triệu), không xóa guided. Trong bảng, “đã giao/invoice X” là chuẩn bị đủ các thao tác tạo đơn → Confirm → giữ → Picking → Packing slip → invoice X. Ngoại trừ ca cố ý làm sai thứ tự, không được bỏ qua các điều kiện này. Các lỗi giữ nguyên chứng từ, bộ đếm, revision và nhật ký thành công.
 
@@ -141,10 +141,28 @@ TH07 còn phải thử khi phiếu giao thứ hai đã có lượng đủ điề
 ## 4. Tình huống dữ liệu và giao diện — ghi rõ mốc áp dụng
 
 - **Tải lại:** sau payment trước settlement (bước 7) và cuối case, tải lại; nếu lưu được, khôi phục đúng trạng thái, câu hỏi, ID liên kết và ba số dư; không tạo lại nghiệp vụ.
-- **Hoàn thành giả (khi xây guided):** đặt cờ completed hoặc bấm hết nút khi chưa có PS-01/ST-01 đúng liên kết; không được công nhận. Dữ liệu đích đúng nhưng câu hỏi/giải thích sai cũng chưa hoàn thành. N=0 không thay kiểm tra invoice còn mở.
-- **Lỗi lưu (mốc 1):** giả lập setItem ném lỗi quota/quyền; vẫn có trạng thái hợp lệ trong phiên và cảnh báo rõ; thử lưu lại không tạo thêm chứng từ. Không có xuất JSON ở mốc 1.
+- **Hoàn thành giả (guided V1.1):** đặt cờ completed hoặc bấm hết nút khi chưa có PS-01/ST-01 đúng liên kết; không được công nhận. Dữ liệu đích đúng nhưng câu hỏi/giải thích sai cũng chưa hoàn thành. N=0 không thay kiểm tra invoice còn mở.
+- **Lỗi lưu (V1.1):** giả lập setItem ném lỗi quota/quyền; vẫn có trạng thái hợp lệ trong phiên và cảnh báo rõ; thử lưu lại không tạo thêm chứng từ. Không có xuất JSON ở V1.1.
 - **Dữ liệu hỏng:** lỗi JSON/schema không hỗ trợ không âm thầm ghi đè. Bảo toàn bản gốc nếu đọc được, rồi đặt lại có xác nhận.
-- **Nhập sai (mốc sau, chưa mốc 1):** ID trùng, tham chiếu mất, sai line/khách, phân bổ vượt Picking/Reservation, O/U âm, sai mode hoặc >5 MB bị từ chối. N âm đúng công thức phải được chấp nhận. Nhập file hợp lệ khôi phục đúng cả ba số dư.
+- **Nhập sai (ngoài V1.1):** ID trùng, tham chiếu mất, sai line/khách, phân bổ vượt Picking/Reservation, O/U âm, sai mode hoặc >5 MB bị từ chối. N âm đúng công thức phải được chấp nhận. Nhập file hợp lệ khôi phục đúng cả ba số dư.
 - **Bấm lặp:** bấm đúp một lần xác nhận chỉ có một chứng từ; mở lại bước cũ không chạy lại. Trong practice, thao tác lặp có chủ đích vẫn hợp lệ nếu còn lượng/số dư.
-- **Hai tab (mốc sau, chưa mốc 1):** phát hiện revision mới hơn thì chặn ghi và hướng dẫn xuất/tải lại; không tuyên bố có khóa đồng thời đầy đủ.
-- **Windows ngoại tuyến:** giải nén ở đường dẫn có dấu/khoảng trắng, mở index.html bằng Edge/Chrome khi ngắt mạng; mốc 1 chạy case tự thực hành, lưu/tải lại và đặt lại; nghiệm thu Windows đầy đủ và xuất/nhập theo mốc sau. Đọc bài không cần truy cập Microsoft Learn; link chỉ là tham khảo trực tuyến tùy chọn.
+- **Hai tab (ngoài V1.1):** phát hiện revision mới hơn thì chặn ghi và hướng dẫn xuất/tải lại; không tuyên bố có khóa đồng thời đầy đủ.
+- **Windows ngoại tuyến:** giải nén ở đường dẫn có dấu/khoảng trắng, mở index.html bằng Edge/Chrome khi ngắt mạng; V1.1 cần kiểm tra cả guided và practice, lưu/tải lại/đổi chế độ/đặt lại; chưa có xuất/nhập JSON. Chỉ nhận nghiệm thu Windows khi đã chạy thật trên Windows. Đọc bài không cần truy cập Microsoft Learn; link chỉ là tham khảo trực tuyến tùy chọn.
+
+## 5. Bài tự thực hành: hoàn tất đơn 2 SP01 — V1.1
+
+Ở practice, chọn “Bắt đầu bài đơn 2 sản phẩm”, xác nhận thay riêng dữ liệu practice bằng seed mới (tồn SP01=6). Hủy xác nhận không đổi dữ liệu; guided không bị xóa. Không tự tạo đơn khi bắt đầu bài.
+
+Người học tự tạo KH01/SP01 lượng 2 giá 1 triệu → Confirm → giữ 2 → lấy 2 → giao 2 → invoice 2 triệu → payment 2 triệu → settlement 2 triệu. Có thể dùng nút chẩn đoán để đi đến form, nhưng phải tự xem trước và ghi nhận.
+
+Sau payment: O/U/N=2/2/0 triệu, invoice vẫn mở và đơn chưa hoàn tất. Sau settlement: 0/0/0, giao 2/2 và invoice 2/2, đơn hoàn tất. Bài chỉ đạt theo chứng từ thật của đơn mục tiêu, không do bấm đủ nút. Đặt lại bài cần xác nhận, chỉ xóa practice.
+
+## 6. Ca nghiệm thu V1.1 bổ sung
+
+- Mở mọi sự kiện, kể cả Tạo đơn/Confirm: có hàng dữ liệu thật trước/sau, chứng từ và lượng/tiền; mở/đóng không thay dữ liệu hoặc Event.
+- Hai đơn cùng KH01 đã invoice 2 và 3 triệu; payment 4 triệu: dư invoice riêng từng đơn là 2/3 triệu, U=4 và thiếu tiền ròng=1 triệu ở cấp khách. Xem hai đơn hoặc bấm nút đi đến settlement không tự dành tiền. Settlement 2 triệu cho đơn đầu: dư riêng đơn đầu 0, đơn sau 3; U còn 2. Không gán N=1 cho cả hai đơn.
+- N=0 nhưng invoice còn mở: hiện rõ thiếu cấn trừ, không tự đóng đơn. N âm cũng phải có giải thích đúng.
+- Preview không thêm Event, candidate không sửa trạng thái; xác nhận kiểm tra lại trạng thái hiện tại.
+- Guided: sai dự đoán trước nghiệp vụ và sai giải thích sau nghiệp vụ được thử lại. Reload trước ghi nhận, sau ghi nhận/chưa trả lời và sau hoàn thành đều khôi phục đúng. Case đủ 8 Event, không tạo lại chứng từ khi trả lời/lưu/xem lại.
+- Cuối guided nhập số hoặc lý do sai thì chưa hoàn thành; đúng tất cả mới hiện “Bài học hoàn thành; đơn chưa hoàn tất”. Chứng từ không khớp case hoặc chỉ sửa cờ completed không qua.
+- Chuyển chế độ và reset một chế độ không đổi khóa dữ liệu còn lại. Lưu lỗi giữ tiến độ trong phiên, cảnh báo thật; không hứa reload được khi chưa lưu.
